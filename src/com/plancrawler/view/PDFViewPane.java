@@ -50,7 +50,6 @@ public class PDFViewPane extends JPanel {
 	}
 
 	public void fitImage() {
-		final double BORDER = 100.0;
 		// get screen size
 		Dimension dim = this.getSize();
 		int screenW = dim.width;
@@ -60,13 +59,9 @@ public class PDFViewPane extends JPanel {
 			return;
 		else {
 			image = originalImage;
-			scale = ((double) (screenH + screenW - 2 * BORDER)) / ((double) (image.getHeight() + image.getWidth()));
+			scale = Math.min((double) (screenH)/(double)(image.getHeight()), (double)(screenW ) / (double) (image.getWidth()));
 
-			// System.out.println("scale " + scale + "... Width/Height = " +
-			// screenW + "/" + screenH + " vs "
-			// + (Math.floor(scale * originalImage.getWidth())));
-
-			minScale = 0.5 * scale;
+			minScale = 0.25 * scale;
 			origin.setTo(0., 0.);
 
 			rescale(1, 0, 0);

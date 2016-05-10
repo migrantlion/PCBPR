@@ -6,9 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import javax.swing.SwingWorker;
 
 import com.plancrawler.model.DocumentHandler;
 import com.plancrawler.model.Item;
@@ -95,5 +92,17 @@ public class Controller {
 
 	public BufferedImage getCurrentPageImage() {
 		return pdfDoc.getCurrentPageImage();
+	}
+	
+	public BufferedImage getPageImage(int page) {
+		return pdfDoc.getPageImage(page);
+	}
+	
+	public int getCurrentPage(){
+		return pdfDoc.getCurrentPage();
+	}
+	
+	public int getNumPages(){
+		return pdfDoc.getNumPages();
 	}
 }

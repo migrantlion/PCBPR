@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -24,13 +25,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.plancrawler.controller.Controller;
 
-
-
 public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private NavToolbarPanel navbarPanel;
-	private RotateToolbarPanel rotbarPanel;
+	private NavToolbar navToolbar;
+	private RotateToolbarPanel rotToolbar;
 	private ItemFormPanel itemFormPanel;
 	private TablePanel tablePanel;
 	private PDFViewPane pdfViewPanel;
@@ -55,11 +54,35 @@ public class MainFrame extends JFrame {
 	}
 
 	private void changePage(int page) {
-		navbarPanel.setCurrPage(page);
+		SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
+			@Override
+			protected void done() {
+				try {
+					BufferedImage image = get();
+					pdfViewPanel.setImage(image);
+					// pdfViewPanel.fitImage();
+					pdfViewPanel.focus();
+					navToolbar.setCurrPage(controller.getCurrentPage());
+					navToolbar.doneProgress();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			protected BufferedImage doInBackground() throws Exception {
+				navToolbar.showProgress();
+				BufferedImage image = controller.getPageImage(page);
+				return image;
+			}
+		};
+		worker.execute();
 	}
 
 	private void addComponents() {
-		addNorthComponents();
+		addToolbarComponents();
 		addWestComponents();
 		addCenterComponents();
 	}
@@ -78,20 +101,21 @@ public class MainFrame extends JFrame {
 		this.add(centerTabPane, BorderLayout.CENTER);
 	}
 
-	private void addNorthComponents() {
+	private void addToolbarComponents() {
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		northPanel.setBorder(BorderFactory.createEtchedBorder());
 
-		navbarPanel = new NavToolbarPanel();
-		navbarPanel.addNavListener((page) -> changePage(page));
-		northPanel.add(navbarPanel);
+		navToolbar = new NavToolbar();
+		navToolbar.addNavListener((page) -> changePage(page));
+		northPanel.add(navToolbar);
 
-		rotbarPanel = new RotateToolbarPanel();
-		rotbarPanel.addRotToolbarListener((e) -> controller.handlePageRotation(e));
+		rotToolbar = new RotateToolbarPanel();
+		rotToolbar.addRotToolbarListener((e) -> controller.handlePageRotation(e));
 
-		northPanel.add(rotbarPanel);
+		northPanel.add(rotToolbar);
 
-		this.add(northPanel, BorderLayout.NORTH);
+		this.add(northPanel, BorderLayout.PAGE_START);
 	}
 
 	private void addWestComponents() {
@@ -136,7 +160,7 @@ public class MainFrame extends JFrame {
 				fileChooser.setAcceptAllFileFilterUsed(true);
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					controller.loadPDF(fileChooser.getSelectedFile());
-					SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>(){
+					SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
 						@Override
 						protected void done() {
 							try {
@@ -144,6 +168,9 @@ public class MainFrame extends JFrame {
 								pdfViewPanel.setImage(image);
 								pdfViewPanel.fitImage();
 								pdfViewPanel.focus();
+								navToolbar.setCurrPage(0);
+								navToolbar.setLastPage(controller.getNumPages());
+								navToolbar.doneProgress();
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							} catch (ExecutionException e) {
@@ -153,7 +180,9 @@ public class MainFrame extends JFrame {
 
 						@Override
 						protected BufferedImage doInBackground() throws Exception {
-							BufferedImage image =controller.getCurrentPageImage();;
+							navToolbar.showProgress();
+							BufferedImage image = controller.getCurrentPageImage();
+							;
 							return image;
 						}
 					};
@@ -189,8 +218,8 @@ public class MainFrame extends JFrame {
 						controller.saveToFile(fileChooser.getSelectedFile());
 						tablePanel.refresh();
 					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(MainFrame.this, "Could save data to file.",
-								"Error saving file", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(MainFrame.this, "Could save data to file.", "Error saving file",
+								JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			});
@@ -225,7 +254,40 @@ public class MainFrame extends JFrame {
 			JMenu windowMenu = new JMenu("Window");
 			windowMenu.setMnemonic(KeyEvent.VK_W);
 
-			JMenu showMenu = new JMenu("Show Window");
+			JCheckBoxMenuItem lockToolbar = new JCheckBoxMenuItem("Lock toolbar");
+			lockToolbar.setSelected(false);
+			lockToolbar.addActionListener((e) -> {
+				if (navToolbar.isFloatable()) {
+					navToolbar.setFloatable(false);
+					rotToolbar.setFloatable(false);
+				} else {
+					navToolbar.setFloatable(true);
+					rotToolbar.setFloatable(true);
+				}
+			});
+			windowMenu.add(lockToolbar);
+
+			JMenu showToolbarMenu = new JMenu("Show Toolbar");
+
+			JCheckBoxMenuItem navBarWindow = new JCheckBoxMenuItem("Navigation Bar");
+			navBarWindow.setSelected(true);
+			navBarWindow.addActionListener((e) -> {
+				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
+				navToolbar.setVisible(menuItem.isSelected());
+			});
+			showToolbarMenu.add(navBarWindow);
+
+			JCheckBoxMenuItem rotBarWindow = new JCheckBoxMenuItem("PageRotation Bar");
+			rotBarWindow.setSelected(true);
+			rotBarWindow.addActionListener((e) -> {
+				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
+				rotToolbar.setVisible(menuItem.isSelected());
+			});
+			showToolbarMenu.add(rotBarWindow);
+
+			windowMenu.add(showToolbarMenu);
+
+			JMenu showPaneMenu = new JMenu("Show Pane");
 
 			JCheckBoxMenuItem addItemWindow = new JCheckBoxMenuItem("Add Item Form");
 			addItemWindow.setSelected(true);
@@ -233,25 +295,9 @@ public class MainFrame extends JFrame {
 				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
 				itemFormPanel.setVisible(menuItem.isSelected());
 			});
-			showMenu.add(addItemWindow);
-
-			JCheckBoxMenuItem navBarWindow = new JCheckBoxMenuItem("Navigation Bar");
-			navBarWindow.setSelected(true);
-			navBarWindow.addActionListener((e) -> {
-				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
-				navbarPanel.setVisible(menuItem.isSelected());
-			});
-			showMenu.add(navBarWindow);
-
-			JCheckBoxMenuItem rotBarWindow = new JCheckBoxMenuItem("PageRotation Bar");
-			rotBarWindow.setSelected(true);
-			rotBarWindow.addActionListener((e) -> {
-				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
-				rotbarPanel.setVisible(menuItem.isSelected());
-			});
-			showMenu.add(rotBarWindow);
-
-			windowMenu.add(showMenu);
+			showPaneMenu.add(addItemWindow);
+			
+			windowMenu.add(showPaneMenu);
 
 			this.add(windowMenu);
 		}
@@ -275,4 +321,3 @@ public class MainFrame extends JFrame {
 		}
 	}
 }
-

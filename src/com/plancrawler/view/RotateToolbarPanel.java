@@ -7,23 +7,24 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JPanel;
+import javax.swing.JToolBar;
 
 import com.plancrawler.view.support.RotToolbarEvent;
 import com.plancrawler.view.support.RotToolbarListener;
 
 
 
-public class RotateToolbarPanel extends JPanel {
+public class RotateToolbarPanel extends JToolBar {
 
 	private static final long serialVersionUID = 1L;
 	private ArrayList<RotToolbarListener> listeners = new ArrayList<RotToolbarListener>();
 	private JButton ccwButt, cwButt, rotAllButt;
 	
 	public RotateToolbarPanel() {
-		setupPanel();
+//		setupPanel();
 		addButtons();
 	}
 	
@@ -35,15 +36,19 @@ public class RotateToolbarPanel extends JPanel {
 	private void addButtons() {
 		RotButtListener rblistener = new RotButtListener();
 		
-		ccwButt = new JButton("-90");
-//		ccwButt.setIcon(createIcon("/toolbarButtonGraphics/general/Undo16.gif", "rotate counter-clockwise"));
+		ccwButt = new JButton();
+		ccwButt.setToolTipText("rotate counter-clockwise");
+		ccwButt.setIcon(createIcon("/com/plancrawler/view/iconImages/Undo16.gif"));
 		ccwButt.addActionListener(rblistener);
 		
-		cwButt = new JButton("+90");
-//		cwButt.setIcon(new ImageIcon("/toolbarButtonGraphics/general/Redo16.gif"));
+		cwButt = new JButton();
+		cwButt.setToolTipText("rotate clockwise");
+		cwButt.setIcon(createIcon("/com/plancrawler/view/iconImages/Redo16.gif"));
 		cwButt.addActionListener(rblistener);
 		
-		rotAllButt = new JButton("Apply Rot to All");
+		rotAllButt = new JButton();
+		rotAllButt.setIcon(createIcon("/com/plancrawler/view/iconImages/Add16.gif"));
+		rotAllButt.setToolTipText("Apply rotation to all pages");
 		rotAllButt.addActionListener(rblistener);
 		
 		this.add(ccwButt);
@@ -51,11 +56,12 @@ public class RotateToolbarPanel extends JPanel {
 		this.add(rotAllButt);
 	}
 	
-	private ImageIcon createIcon(String path, String reader) {
-		URL url = getClass().getResource(path);
+	private Icon createIcon(String string) {
+		URL url = getClass().getResource(string);
 		if (url == null)
-			System.out.println("could not load resource: "+path);
-		ImageIcon icon = new ImageIcon(path, reader);
+			System.err.println("could not load resource "+string);
+		
+		ImageIcon icon = new ImageIcon(url);
 		return icon;
 	}
 	
