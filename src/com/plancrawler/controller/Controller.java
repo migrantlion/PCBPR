@@ -75,22 +75,13 @@ public class Controller {
 		List<Paintable> paintable = new ArrayList<Paintable>();
 
 		for (Item i : items) {
-
 			List<Tokens> tokens = i.getTokensOnPage(page);
 			for (Tokens t : tokens)
 				tokenPainter.add(new TokenPainter(t));
-
+			tokens.clear();
 		}
 		paintable.addAll(tokenPainter);
 		return paintable;
-	}
-
-	private boolean isInDisplayList(Item i, List<String> list) {
-		boolean answer = false;
-		for (String s : list)
-			if (s.equals(i.getName()))
-				answer = true;
-		return answer;
 	}
 
 	public File getCurrentPDFDirectory() {
@@ -132,7 +123,7 @@ public class Controller {
 
 	public void dropToken(MyPoint point) {
 		if (hasActiveItem()) {
-			Location loc = new Location(activeItemRow, point, ItemLocations.ON_PAGE);
+			Location loc = new Location(getCurrentPage(), point, ItemLocations.ON_PAGE);
 			db.addTokenToItem(loc, activeItemRow);
 		}
 

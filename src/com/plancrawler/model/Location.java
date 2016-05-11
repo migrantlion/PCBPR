@@ -8,17 +8,17 @@ public class Location implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private int page;
-	private MyPoint loc;
+	private MyPoint point;
 	private ItemLocations whereAt;
 
 	public Location(int page, MyPoint loc, ItemLocations whereAt) {
 		this.page = page;
-		this.loc = loc;
+		this.point = loc;
 		this.whereAt = whereAt;
 	}
 
 	public boolean isSameLocation(Location other) {
-		return (this.page == other.page && this.whereAt == other.whereAt && MyPoint.dist(this.loc, other.loc) < 20);
+		return (this.page == other.page && this.whereAt == other.whereAt && MyPoint.dist(this.point, other.point) < 20);
 	}
 
 	public int getPage() {
@@ -29,12 +29,12 @@ public class Location implements Serializable {
 		this.page = page;
 	}
 
-	public MyPoint getLoc() {
-		return loc;
+	public MyPoint getPoint() {
+		return new MyPoint(point);
 	}
 
-	public void setLoc(MyPoint loc) {
-		this.loc = loc;
+	public void setPoint(MyPoint loc) {
+		this.point = loc;
 	}
 
 	public ItemLocations getWhereAt() {

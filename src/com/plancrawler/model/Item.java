@@ -3,6 +3,7 @@ package com.plancrawler.model;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -60,6 +61,21 @@ public class Item implements Serializable, Comparable<Item> {
 			if (t.isOnPage(page))
 				tokensOnPage.add(t);
 		return tokensOnPage;
+	}
+	
+	public List<Integer> foundOnWhatPage(){
+		List<Integer> pages = new ArrayList<Integer>();
+		List<Integer> uniquePages = new ArrayList<Integer>();
+		
+		for (Tokens t : tokens)
+			pages.add(t.getLocation().getPage());
+		
+		Collections.sort(pages);
+		for (int i : pages)
+			if (!uniquePages.contains(i))
+				uniquePages.add(i);
+		
+		return uniquePages;
 	}
 
 	public String getName() {

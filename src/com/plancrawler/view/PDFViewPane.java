@@ -171,6 +171,7 @@ public class PDFViewPane extends JPanel {
 
 	public void setDisplayMarks(List<Paintable> list) {
 		this.marks = list;
+		repaint();
 	}
 
 }

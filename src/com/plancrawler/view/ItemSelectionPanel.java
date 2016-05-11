@@ -55,6 +55,7 @@ public class ItemSelectionPanel extends JPanel {
 				if (e.getButton() == MouseEvent.BUTTON3){
 					popup.show(table, e.getX(), e.getY());
 				}
+				alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, row, false, false));
 			}
 			
 		});
@@ -69,12 +70,20 @@ public class ItemSelectionPanel extends JPanel {
 			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, row, false, true));
 		});
 		popup.add(remItem);
+		
 		JMenuItem changeItem = new JMenuItem("modify row");
 		changeItem.addActionListener((e)->{
 			int row = table.getSelectedRow();
 			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, row, true, false));
 		});
 		popup.add(changeItem);
+		
+		JMenuItem clearSelectItem = new JMenuItem("de-select");
+		clearSelectItem.addActionListener((e)->{
+			table.clearSelection();
+			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, -1, false, false));
+		});
+		popup.add(clearSelectItem);
 	}
 		
 	private void alertListeners(ItemSelectionEvent itemSelectionEvent) {

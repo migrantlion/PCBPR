@@ -30,7 +30,6 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.plancrawler.controller.Controller;
-import com.plancrawler.model.Location;
 import com.plancrawler.model.utilities.MyPoint;
 
 public class MainFrame extends JFrame {
@@ -61,34 +60,6 @@ public class MainFrame extends JFrame {
 		setLocationRelativeTo(null);
 		setJMenuBar(new PCMenuBar());
 		setVisible(true);
-	}
-
-	private void changePage(int page) {
-		SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
-			@Override
-			protected void done() {
-				try {
-					BufferedImage image = get();
-					pdfViewPanel.setImage(image);
-					// pdfViewPanel.fitImage();
-					pdfViewPanel.focus();
-					navToolbar.setCurrPage(controller.getCurrentPage());
-					navToolbar.doneProgress();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-				}
-			}
-
-			@Override
-			protected BufferedImage doInBackground() throws Exception {
-				navToolbar.showProgress();
-				BufferedImage image = controller.getPageImage(page);
-				return image;
-			}
-		};
-		worker.execute();
 	}
 
 	private void addComponents() {
@@ -157,8 +128,7 @@ public class MainFrame extends JFrame {
 		itemFormPanel = new ItemFormPanel();
 		itemFormPanel.addFormListener((e) -> {
 			controller.addItem(e);
-			tablePanel.refresh();
-			itemSelectPanel.refresh();
+			refreshTables();
 		});
 		westPanel.add(itemFormPanel);
 
@@ -168,8 +138,7 @@ public class MainFrame extends JFrame {
 			controller.setActiveItemRow(e.getRow());
 			if (e.isDeleteRequest()) {
 				controller.deleteItemRow(e.getRow());
-				tablePanel.refresh();
-				itemSelectPanel.refresh();
+				refreshTables();
 			} else if (e.isModifyRequest()) {
 				System.out.println("Modify was requested of row " + e.getRow());
 			}
@@ -179,6 +148,19 @@ public class MainFrame extends JFrame {
 		this.add(westPanel, BorderLayout.WEST);
 
 	}
+	
+	private void refreshTables(){
+		tablePanel.refresh();
+		itemSelectPanel.refresh();
+		
+		// if tables are updated, then Marks probably need to be as well
+		updateMarks();
+	}
+	
+	private void updateMarks(){
+		pdfViewPanel.setDisplayMarks(controller.getPaintables(controller.getCurrentPage()));
+		repaint();
+	}
 
 	private void setToolbarFloat(boolean state) {
 		navToolbar.setFloatable(state);
@@ -186,6 +168,35 @@ public class MainFrame extends JFrame {
 		focusToolbar.setFloatable(state);
 	}
 
+	private void changePage(int page) {
+		SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
+			@Override
+			protected void done() {
+				try {
+					BufferedImage image = get();
+					pdfViewPanel.setImage(image);
+					// pdfViewPanel.fitImage();
+					pdfViewPanel.focus();
+					updateMarks();
+					navToolbar.setCurrPage(controller.getCurrentPage());
+					navToolbar.doneProgress();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			protected BufferedImage doInBackground() throws Exception {
+				navToolbar.showProgress();
+				BufferedImage image = controller.getPageImage(page);
+				return image;
+			}
+		};
+		worker.execute();
+	}
+	
 	private class PCMenuBar extends JMenuBar {
 		private static final long serialVersionUID = 1L;
 		JFileChooser fileChooser = new JFileChooser();
@@ -385,11 +396,11 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			if (e.getSource() == pdfViewPanel) {
+			if (e.getSource() == pdfViewPanel && e.getButton() == MouseEvent.BUTTON1) {
 				MyPoint point = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
 				if (controller.hasActiveItem()) {
 					controller.dropToken(point);
-					pdfViewPanel.setDisplayMarks(controller.getPaintables(controller.getCurrentPage()));
+					updateMarks();
 				}
 			}
 		}

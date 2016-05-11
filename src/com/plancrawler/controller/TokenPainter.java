@@ -26,7 +26,7 @@ public class TokenPainter extends Tokens implements Paintable {
 		Graphics2D g2 = (Graphics2D) g;
 
 		Location loc = getLocation();
-		MyPoint pt = loc.getLoc();
+		MyPoint pt = loc.getPoint();
 		pt.scale(scale);
 		pt.translate(origin);
 
