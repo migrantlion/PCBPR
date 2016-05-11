@@ -12,7 +12,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
@@ -43,6 +42,7 @@ public class MainFrame extends JFrame {
 	private NavToolbar navToolbar;
 	private RotateToolbar rotToolbar;
 	private FocusToolbar focusToolbar;
+	private MeasureToolbar measToolbar;
 
 	// Panes
 	private ItemFormPanel itemFormPanel;
@@ -76,9 +76,9 @@ public class MainFrame extends JFrame {
 	}
 
 	private void addToolbarComponents() {
-		JPanel northPanel = new JPanel();
-		northPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-		northPanel.setBorder(BorderFactory.createEtchedBorder());
+		JPanel toolPanel = new JPanel();
+		toolPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		toolPanel.setBorder(BorderFactory.createEtchedBorder());
 
 		fileToolbar = new SaveLoadToolbar();
 		fileToolbar.addSaveLoadToolbarListener((e) -> {
@@ -89,11 +89,18 @@ public class MainFrame extends JFrame {
 			if (e.isSaveRequest())
 				saveTO();
 		});
-		northPanel.add(fileToolbar);
+		toolPanel.add(fileToolbar);
+		
+		rotToolbar = new RotateToolbar();
+		rotToolbar.addRotToolbarListener((e) -> {
+			controller.handlePageRotation(e);
+			changePage(controller.getCurrentPage());
+		});
+		toolPanel.add(rotToolbar);
 
 		navToolbar = new NavToolbar();
 		navToolbar.addNavListener((page) -> changePage(page));
-		northPanel.add(navToolbar);
+		toolPanel.add(navToolbar);
 
 		focusToolbar = new FocusToolbar();
 		focusToolbar.addFocusToolbarListener((e) -> {
@@ -108,17 +115,16 @@ public class MainFrame extends JFrame {
 			if (e.isFocusRequested())
 				focusworker.execute();
 		});
-		northPanel.add(focusToolbar);
+		toolPanel.add(focusToolbar);
 
-		rotToolbar = new RotateToolbar();
-		rotToolbar.addRotToolbarListener((e) -> {
-			controller.handlePageRotation(e);
-			changePage(controller.getCurrentPage());
+		measToolbar = new MeasureToolbar();
+		measToolbar.addMeasurementListener((m)->{
+			//TODO: add measurement handling
 		});
-
-		northPanel.add(rotToolbar);
+		toolPanel.add(measToolbar);
+		
 		setToolbarFloat(false); // initially set all to locked
-		this.add(northPanel, BorderLayout.PAGE_START);
+		this.add(toolPanel, BorderLayout.PAGE_START);
 	}
 
 	private void setToolbarFloat(boolean state) {
@@ -126,6 +132,7 @@ public class MainFrame extends JFrame {
 		navToolbar.setFloatable(state);
 		rotToolbar.setFloatable(state);
 		focusToolbar.setFloatable(state);
+		measToolbar.setFloatable(state);
 	}
 
 	private void addCenterComponents() {
@@ -425,6 +432,14 @@ public class MainFrame extends JFrame {
 				rotToolbar.setVisible(menuItem.isSelected());
 			});
 			showToolbarMenu.add(rotBarWindow);
+			
+			JCheckBoxMenuItem measBarWindow = new JCheckBoxMenuItem("Measurement Bar");
+			measBarWindow.setSelected(true);
+			measBarWindow.addActionListener((e) -> {
+				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
+				measToolbar.setVisible(menuItem.isSelected());
+			});
+			showToolbarMenu.add(measBarWindow);
 
 			windowMenu.add(showToolbarMenu);
 

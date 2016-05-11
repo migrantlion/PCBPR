@@ -27,6 +27,18 @@ public class Database {
 		return uniqueInstance;
 	}
 	
+	public void addMeasurement(Measurement measure){
+		measurements.add(measure);
+	}
+	
+	public boolean remMeasurement(Measurement measure){
+		return measurements.remove(measure);
+	}
+	
+	public List<Measurement> getMeasurements(){
+		return Collections.unmodifiableList(measurements);
+	}
+	
 	public void addItem(Item item) {
 		items.add(item);
 		Collections.sort(items);

@@ -11,6 +11,7 @@ import javax.swing.border.Border;
 
 import com.plancrawler.model.Item;
 import com.plancrawler.view.support.ItemTableModel;
+import com.plancrawler.view.support.ItemTableRenderer;
 
 
 
@@ -23,6 +24,8 @@ public class TablePanel extends JPanel {
 	
 	public TablePanel() {
 		table = new JTable(tableModel);
+		ItemTableRenderer renderer = new ItemTableRenderer();
+		table.setDefaultRenderer(table.getColumnClass(0), renderer);
 		
 		setLayout(new BorderLayout());
 		Border innerBorder = BorderFactory.createTitledBorder("Item View");

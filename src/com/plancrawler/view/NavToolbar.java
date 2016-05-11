@@ -58,7 +58,7 @@ public class NavToolbar extends JToolBar {
 		priorButt.addActionListener(listener);
 		lastButt.addActionListener(listener);
 
-		pageLabel = new JLabel("page " + display(currPage) + " of " + display(lastPage));
+		pageLabel = new JLabel("page " + display(currPage) + " of " + display(lastPage)+" ");
 
 		jumpField = new JTextField(display(currPage), 5);
 		jumpField.addActionListener(new NavTextListener());

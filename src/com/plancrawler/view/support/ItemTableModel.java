@@ -1,5 +1,6 @@
 package com.plancrawler.view.support;
 
+import java.awt.Color;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
@@ -10,10 +11,14 @@ public class ItemTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;
 	private List<Item> db;
-	private String[] colNames = {"Name","Quantity","Description","Category","Found on Pages"};
+	private String[] colNames = {"Color","Name","Description","Quantity","Category","Found on Pages"};
 
 	public void setData(List<Item> db) {
 		this.db = db;
+	}
+	
+	public Color getRowColor(int row){
+		return db.get(row).getColor();
 	}
 
 	@Override
@@ -29,7 +34,7 @@ public class ItemTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 5;
+		return 6;
 	}
 
 	@Override
@@ -38,14 +43,16 @@ public class ItemTableModel extends AbstractTableModel {
 
 		switch (columnIndex) {
 		case 0:
-			return item.getName();
+			return " ";
 		case 1:
-			return item.getTokenCount();
+			return item.getName();
 		case 2:
-			return item.getDescription();
+			return item.getDescription();			
 		case 3:
-			return item.getCategory();
+			return item.getTokenCount();
 		case 4:
+			return item.getCategory();
+		case 5:
 			List<Integer> pages = item.foundOnWhatPage();
 			String pageString = "";
 			for (int p : pages)

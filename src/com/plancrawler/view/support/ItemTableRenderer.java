@@ -9,7 +9,7 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 
-public class ItemSelectionTableRenderer extends DefaultTableCellRenderer {
+public class ItemTableRenderer extends DefaultTableCellRenderer {
 
 	private static final long serialVersionUID = 1L;
 
@@ -21,21 +21,21 @@ public class ItemSelectionTableRenderer extends DefaultTableCellRenderer {
 		JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 
 		// Get the color for the current row.
-		ItemSelectionTableModel tableModel = (ItemSelectionTableModel) table.getModel();
+		ItemTableModel tableModel = (ItemTableModel) table.getModel();
 		Color color = tableModel.getRowColor(row);
 		if (col == 0) {
 			l.setBackground(color);
 		} else {
 			l.setBackground(Color.white);
 		}
-		if (col == 3){
+		if (col == 3) {
 			// quantity
 			l.setHorizontalAlignment(SwingConstants.CENTER);
 		} else
 			l.setHorizontalAlignment(SwingConstants.LEFT);
-		
-		if (table.isRowSelected(row)){
-			l.setBorder(BorderFactory.createLineBorder(Color.green, 2));
+
+		if (table.isRowSelected(row)) {
+			l.setBorder(BorderFactory.createLineBorder(Color.magenta, 2));
 		}
 
 		// Return the JLabel which renders the cell.
