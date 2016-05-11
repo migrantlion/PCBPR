@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.plancrawler.model.DocumentHandler;
 import com.plancrawler.model.Item;
-import com.plancrawler.model.ItemDatabase;
+import com.plancrawler.model.Database;
 import com.plancrawler.model.ItemLocations;
 import com.plancrawler.model.Location;
 import com.plancrawler.model.Tokens;
@@ -20,12 +20,12 @@ import com.plancrawler.view.support.RotToolbarEvent;
 
 public class Controller {
 
-	private ItemDatabase db;
+	private Database db;
 	private DocumentHandler pdfDoc;
 	private int activeItemRow = -1;
 
 	public Controller() {
-		this.db = ItemDatabase.getInstance();
+		this.db = Database.getInstance();
 		this.pdfDoc = new DocumentHandler();
 	}
 
@@ -35,6 +35,7 @@ public class Controller {
 			pdfDoc.setCurrentFile(file.getAbsolutePath());
 			pdfDoc.setDocProperties();
 		}
+		db.setAssociatedPDFName(pdfDoc.getCurrentFile());
 		return pdfDoc.getCurrentFile();
 	}
 
@@ -76,6 +77,7 @@ public class Controller {
 
 	public void loadFromFile(File file) throws IOException {
 		db.loadFromFile(file);
+		loadPDF(new File(db.getAssociatedPDFName()));
 	}
 
 	public List<Paintable> getPaintables(int page) {
@@ -142,5 +144,13 @@ public class Controller {
 			Location loc = new Location(getCurrentPage(), point, ItemLocations.ON_PAGE);
 			db.remTokenFromItem(loc, activeItemRow);
 		}	
+	}
+
+	public void clearTables() {
+		db.wipeTokens();
+	}
+
+	public String getAssociatedPDFName() {
+		return db.getAssociatedPDFName();
 	}
 }

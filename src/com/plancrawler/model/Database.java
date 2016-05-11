@@ -11,16 +11,19 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ItemDatabase {
-
-	private List<Item> items; 
-	private static ItemDatabase uniqueInstance = new ItemDatabase();
+public class Database {
+	private static Database uniqueInstance = new Database();
 	
-	private ItemDatabase() {
+	private String associatedPDFName = null;
+	private List<Item> items; 
+	private List<Measurement> measurements;
+	
+	private Database() {
 		items = new LinkedList<Item>();
+		measurements = new LinkedList<Measurement>();
 	}
 	
-	public static ItemDatabase getInstance() {
+	public static Database getInstance() {
 		return uniqueInstance;
 	}
 	
@@ -65,7 +68,12 @@ public class ItemDatabase {
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
 		
 		Item[] itemArray = items.toArray(new Item[items.size()]);
+		Measurement[] mArray = measurements.toArray(new Measurement[measurements.size()]);
+		
 		oos.writeObject(itemArray);
+		oos.writeObject(mArray);
+		oos.writeObject(associatedPDFName);
+		
 		oos.close();
 	}
 	
@@ -75,9 +83,14 @@ public class ItemDatabase {
 		
 		try {
 			Item[] itemArray = (Item[]) ois.readObject();
+			Measurement[] mArray = (Measurement[]) ois.readObject();
+			associatedPDFName = (String) ois.readObject();
 			
 			items.clear();
 			items.addAll(Arrays.asList(itemArray));
+			
+			measurements.clear();
+			measurements.addAll(Arrays.asList(mArray));
 			
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -90,5 +103,20 @@ public class ItemDatabase {
 			return;
 		items.remove(row);		
 	}
+
+	public void wipeTokens() {
+		for (Item item : items){
+			item.wipeTokens();
+		}
+	}
+
+	public String getAssociatedPDFName() {
+		return associatedPDFName;
+	}
+
+	public void setAssociatedPDFName(String associatedPDFName) {
+		this.associatedPDFName = associatedPDFName;
+	}
+	
 }
 

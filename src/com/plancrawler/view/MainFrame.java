@@ -12,6 +12,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
@@ -25,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.MouseInputListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -35,9 +37,14 @@ import com.plancrawler.model.utilities.MyPoint;
 public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+
+	// Tool-bars
+	private SaveLoadToolbar fileToolbar;
 	private NavToolbar navToolbar;
 	private RotateToolbar rotToolbar;
 	private FocusToolbar focusToolbar;
+
+	// Panes
 	private ItemFormPanel itemFormPanel;
 	private TablePanel tablePanel;
 	private PDFViewPane pdfViewPanel;
@@ -73,6 +80,17 @@ public class MainFrame extends JFrame {
 		northPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		northPanel.setBorder(BorderFactory.createEtchedBorder());
 
+		fileToolbar = new SaveLoadToolbar();
+		fileToolbar.addSaveLoadToolbarListener((e) -> {
+			if (e.isLoadPDFRequest())
+				loadPDF();
+			if (e.isLoadRequest())
+				loadTO();
+			if (e.isSaveRequest())
+				saveTO();
+		});
+		northPanel.add(fileToolbar);
+
 		navToolbar = new NavToolbar();
 		navToolbar.addNavListener((page) -> changePage(page));
 		northPanel.add(navToolbar);
@@ -103,6 +121,13 @@ public class MainFrame extends JFrame {
 		this.add(northPanel, BorderLayout.PAGE_START);
 	}
 
+	private void setToolbarFloat(boolean state) {
+		fileToolbar.setFloatable(state);
+		navToolbar.setFloatable(state);
+		rotToolbar.setFloatable(state);
+		focusToolbar.setFloatable(state);
+	}
+
 	private void addCenterComponents() {
 		MouseHandler handler = new MouseHandler();
 		JTabbedPane centerTabPane = new JTabbedPane();
@@ -130,8 +155,9 @@ public class MainFrame extends JFrame {
 			int action = JOptionPane.OK_OPTION;
 			if (controller.hasItemByName(e.getItemName())) {
 				action = JOptionPane.showConfirmDialog(MainFrame.this,
-						"Duplicate Item with Name: " + e.getItemName() + ".  Are you sure you want to add this entry?",
-						"Confirm entry", JOptionPane.OK_CANCEL_OPTION);
+						"Trying to Add a duplicate Item with Name: " + e.getItemName()
+								+ ".\n  Are you sure you want to add this entry?",
+						"Confirm entry", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 			}
 			if (action == JOptionPane.OK_OPTION) {
 				controller.addItem(e);
@@ -170,12 +196,6 @@ public class MainFrame extends JFrame {
 		repaint();
 	}
 
-	private void setToolbarFloat(boolean state) {
-		navToolbar.setFloatable(state);
-		rotToolbar.setFloatable(state);
-		focusToolbar.setFloatable(state);
-	}
-
 	private void changePage(int page) {
 		SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
 			@Override
@@ -205,6 +225,115 @@ public class MainFrame extends JFrame {
 		worker.execute();
 	}
 
+	private void loadPDF() {
+		JFileChooser fileChooser = new JFileChooser();
+
+		fileChooser.setCurrentDirectory(controller.getCurrentPDFDirectory());
+		fileChooser.resetChoosableFileFilters();
+		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF files (.pdf)", "pdf"));
+		fileChooser.setAcceptAllFileFilterUsed(true);
+
+		if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+			controller.loadPDF(fileChooser.getSelectedFile());
+			SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
+				@Override
+				protected void done() {
+					try {
+						BufferedImage image = get();
+						pdfViewPanel.setImage(image);
+						pdfViewPanel.fitImage();
+						pdfViewPanel.focus();
+						navToolbar.setCurrPage(0);
+						navToolbar.setLastPage(controller.getNumPages());
+						navToolbar.doneProgress();
+						updateMarks();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						e.printStackTrace();
+					}
+				}
+
+				@Override
+				protected BufferedImage doInBackground() throws Exception {
+					navToolbar.showProgress();
+					BufferedImage image = controller.getCurrentPageImage();
+					controller.clearTables();
+					return image;
+				}
+			};
+			worker.execute();
+		}
+	}
+
+	private void loadTO() {
+		JFileChooser fileChooser = new JFileChooser();
+
+		fileChooser.setCurrentDirectory(controller.getCurrentPDFDirectory());
+		fileChooser.resetChoosableFileFilters();
+		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PlanCrawler TakeOff files (.pto)", "pto"));
+		fileChooser.setAcceptAllFileFilterUsed(true);
+
+		if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+			SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
+				@Override
+				protected void done() {
+					try {
+						BufferedImage image = get();
+						pdfViewPanel.setImage(image);
+						pdfViewPanel.fitImage();
+						pdfViewPanel.focus();
+						navToolbar.setCurrPage(0);
+						navToolbar.setLastPage(controller.getNumPages());
+						navToolbar.doneProgress();
+						refreshTables();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						e.printStackTrace();
+					}
+				}
+
+				protected BufferedImage doInBackground() throws Exception {
+					BufferedImage image = null;
+					try {
+						controller.loadFromFile(fileChooser.getSelectedFile());
+						navToolbar.showProgress();
+						image = controller.getCurrentPageImage();
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(MainFrame.this, "Could not load data from file.",
+								"Error loading file", JOptionPane.ERROR_MESSAGE);
+					}
+					return image;
+				}
+			};
+			worker.execute();
+		}
+	}
+
+	private void saveTO() {
+		JFileChooser fileChooser = new JFileChooser();
+
+		fileChooser.setCurrentDirectory(controller.getCurrentPDFDirectory());
+		fileChooser.resetChoosableFileFilters();
+		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PlanCrawler TakeOff files (.pto)", "pto"));
+		fileChooser.setAcceptAllFileFilterUsed(true);
+		if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						controller.saveToFile(fileChooser.getSelectedFile());
+						refreshTables();
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(MainFrame.this, "Could save data to file.", "Error saving file",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			});
+		}
+	}
+
 	private class PCMenuBar extends JMenuBar {
 		private static final long serialVersionUID = 1L;
 		JFileChooser fileChooser = new JFileChooser();
@@ -228,77 +357,13 @@ public class MainFrame extends JFrame {
 			fileMenu.setMnemonic(KeyEvent.VK_F);
 
 			JMenuItem loadPDFMenuItem = new JMenuItem("Load PDF");
-			loadPDFMenuItem.addActionListener((e) -> {
-				fileChooser.setCurrentDirectory(controller.getCurrentPDFDirectory());
-				fileChooser.resetChoosableFileFilters();
-				fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF files (.pdf)", "pdf"));
-
-				fileChooser.setAcceptAllFileFilterUsed(true);
-				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
-					controller.loadPDF(fileChooser.getSelectedFile());
-					SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
-						@Override
-						protected void done() {
-							try {
-								BufferedImage image = get();
-								pdfViewPanel.setImage(image);
-								pdfViewPanel.fitImage();
-								pdfViewPanel.focus();
-								navToolbar.setCurrPage(0);
-								navToolbar.setLastPage(controller.getNumPages());
-								navToolbar.doneProgress();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							} catch (ExecutionException e) {
-								e.printStackTrace();
-							}
-						}
-
-						@Override
-						protected BufferedImage doInBackground() throws Exception {
-							navToolbar.showProgress();
-							BufferedImage image = controller.getCurrentPageImage();
-							;
-							return image;
-						}
-					};
-					worker.execute();
-				}
-			});
+			loadPDFMenuItem.addActionListener((e) -> loadPDF());
 
 			JMenuItem loadTOMenuItem = new JMenuItem("Load TakeOff");
-			loadTOMenuItem.addActionListener((e) -> {
-				fileChooser.resetChoosableFileFilters();
-				fileChooser
-						.addChoosableFileFilter(new FileNameExtensionFilter("PlanCrawler TakeOff files (.pto)", "pto"));
-				fileChooser.setAcceptAllFileFilterUsed(true);
-				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
-					try {
-						controller.loadFromFile(fileChooser.getSelectedFile());
-						tablePanel.refresh();
-					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(MainFrame.this, "Could not load data from file.",
-								"Error loading file", JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			});
+			loadTOMenuItem.addActionListener((e) -> loadTO());
 
 			JMenuItem saveMenuItem = new JMenuItem("Save TakeOff");
-			saveMenuItem.addActionListener((e) -> {
-				fileChooser.resetChoosableFileFilters();
-				fileChooser
-						.addChoosableFileFilter(new FileNameExtensionFilter("PlanCrawler TakeOff files (.pto)", "pto"));
-				fileChooser.setAcceptAllFileFilterUsed(true);
-				if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
-					try {
-						controller.saveToFile(fileChooser.getSelectedFile());
-						tablePanel.refresh();
-					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(MainFrame.this, "Could save data to file.", "Error saving file",
-								JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			});
+			saveMenuItem.addActionListener((e) -> saveTO());
 
 			JMenuItem exportImages = new JMenuItem("Export Images");
 
@@ -336,6 +401,14 @@ public class MainFrame extends JFrame {
 			windowMenu.add(lockToolbar);
 
 			JMenu showToolbarMenu = new JMenu("Show Toolbar");
+
+			JCheckBoxMenuItem fileBarWindow = new JCheckBoxMenuItem("File load/save Bar");
+			fileBarWindow.setSelected(true);
+			fileBarWindow.addActionListener((e) -> {
+				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
+				fileToolbar.setVisible(menuItem.isSelected());
+			});
+			showToolbarMenu.add(fileBarWindow);
 
 			JCheckBoxMenuItem navBarWindow = new JCheckBoxMenuItem("Navigation Bar");
 			navBarWindow.setSelected(true);

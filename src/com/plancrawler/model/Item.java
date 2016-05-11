@@ -129,4 +129,8 @@ public class Item implements Serializable, Comparable<Item> {
 		else
 			return this.category.compareTo(other.category);
 	}
+
+	public void wipeTokens() {
+		tokens.clear();
+	}
 }
