@@ -33,28 +33,20 @@ public class ItemDatabase {
 		return items.remove(item);
 	}
 	
-	public void addTokenToItem(Location loc, int activeItemRow){
-		Item i = getItem(activeItemRow);
+	public void addTokenToItem(Location loc, int itemIndex){
+		Item i = getItem(itemIndex);
 		if (i == null){
-			System.err.println("Unknown row ("+activeItemRow+") requested");
+			System.err.println("Unknown row ("+itemIndex+") requested");
 		} else
 			i.addToken(loc);
 	}
 	
-	public boolean remTokenFromItem(Location loc, Item item){
-		Item i = getItem(item);
+	public boolean remTokenFromItem(Location loc, int itemIndex){
+		Item i = getItem(itemIndex);
 		if (i == null)
 			return false;
 		else
 			return i.remToken(loc);
-	}
-	
-	private Item getItem(Item item){
-		Item returnItem = null;
-		for (Item i : items)
-			if (i.equals(item))
-				returnItem = i;
-		return returnItem;
 	}
 	
 	private Item getItem(int index){

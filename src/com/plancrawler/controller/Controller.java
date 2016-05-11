@@ -53,6 +53,15 @@ public class Controller {
 		Item item = new Item(name, desc, cat, color);
 		db.addItem(item);
 	}
+	
+	public boolean hasItemByName(String name){
+		List<Item> items = db.getItems();
+		boolean answer = false;
+		for (Item i : items)
+			if (i.getName().equals(name))
+				answer = true;
+		return answer;
+	}
 
 	public void handlePageRotation(RotToolbarEvent e) {
 		if (e.getRotation() != 0)
@@ -126,7 +135,12 @@ public class Controller {
 			Location loc = new Location(getCurrentPage(), point, ItemLocations.ON_PAGE);
 			db.addTokenToItem(loc, activeItemRow);
 		}
-
 	}
 
+	public void removeToken(MyPoint point) {
+		if (hasActiveItem()) {
+			Location loc = new Location(getCurrentPage(), point, ItemLocations.ON_PAGE);
+			db.remTokenFromItem(loc, activeItemRow);
+		}	
+	}
 }

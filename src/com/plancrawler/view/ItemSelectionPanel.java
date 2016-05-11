@@ -64,6 +64,13 @@ public class ItemSelectionPanel extends JPanel {
 	}
 
 	private void addButtons(){
+		JMenuItem clearSelectItem = new JMenuItem("de-select");
+		clearSelectItem.addActionListener((e)->{
+			table.clearSelection();
+			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, -1, false, false));
+		});
+		popup.add(clearSelectItem);
+		
 		JMenuItem remItem = new JMenuItem("delte row");
 		remItem.addActionListener((e)->{
 			int row = table.getSelectedRow();
@@ -77,13 +84,6 @@ public class ItemSelectionPanel extends JPanel {
 			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, row, true, false));
 		});
 		popup.add(changeItem);
-		
-		JMenuItem clearSelectItem = new JMenuItem("de-select");
-		clearSelectItem.addActionListener((e)->{
-			table.clearSelection();
-			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, -1, false, false));
-		});
-		popup.add(clearSelectItem);
 	}
 		
 	private void alertListeners(ItemSelectionEvent itemSelectionEvent) {

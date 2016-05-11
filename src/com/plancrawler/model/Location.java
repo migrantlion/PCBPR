@@ -18,7 +18,7 @@ public class Location implements Serializable {
 	}
 
 	public boolean isSameLocation(Location other) {
-		return (this.page == other.page && this.whereAt == other.whereAt && MyPoint.dist(this.point, other.point) < 20);
+		return (this.page == other.page && this.whereAt == other.whereAt && MyPoint.dist(this.point, other.point) < 50);
 	}
 
 	public int getPage() {

@@ -127,8 +127,16 @@ public class MainFrame extends JFrame {
 
 		itemFormPanel = new ItemFormPanel();
 		itemFormPanel.addFormListener((e) -> {
-			controller.addItem(e);
-			refreshTables();
+			int action = JOptionPane.OK_OPTION;
+			if (controller.hasItemByName(e.getItemName())) {
+				action = JOptionPane.showConfirmDialog(MainFrame.this,
+						"Duplicate Item with Name: " + e.getItemName() + ".  Are you sure you want to add this entry?",
+						"Confirm entry", JOptionPane.OK_CANCEL_OPTION);
+			}
+			if (action == JOptionPane.OK_OPTION) {
+				controller.addItem(e);
+				refreshTables();
+			}
 		});
 		westPanel.add(itemFormPanel);
 
@@ -148,16 +156,16 @@ public class MainFrame extends JFrame {
 		this.add(westPanel, BorderLayout.WEST);
 
 	}
-	
-	private void refreshTables(){
+
+	private void refreshTables() {
 		tablePanel.refresh();
 		itemSelectPanel.refresh();
-		
+
 		// if tables are updated, then Marks probably need to be as well
 		updateMarks();
 	}
-	
-	private void updateMarks(){
+
+	private void updateMarks() {
 		pdfViewPanel.setDisplayMarks(controller.getPaintables(controller.getCurrentPage()));
 		repaint();
 	}
@@ -196,7 +204,7 @@ public class MainFrame extends JFrame {
 		};
 		worker.execute();
 	}
-	
+
 	private class PCMenuBar extends JMenuBar {
 		private static final long serialVersionUID = 1L;
 		JFileChooser fileChooser = new JFileChooser();
@@ -385,6 +393,8 @@ public class MainFrame extends JFrame {
 		private int mouseX, mouseY;
 		private boolean needsFocus = false;
 		private boolean isAlreadyOneClick = false;
+		private boolean button1Pressed = false;
+		private boolean button3Pressed = false;;
 		MyPoint pt1;
 
 		@Override
@@ -396,11 +406,18 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			if (e.getSource() == pdfViewPanel && e.getButton() == MouseEvent.BUTTON1) {
+			if (e.getSource() == pdfViewPanel) {
 				MyPoint point = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
-				if (controller.hasActiveItem()) {
-					controller.dropToken(point);
-					updateMarks();
+				if (e.getButton() == MouseEvent.BUTTON1) {
+					if (controller.hasActiveItem()) {
+						controller.dropToken(point);
+						updateMarks();
+					}
+				} else if (e.getButton() == MouseEvent.BUTTON3) {
+					if (controller.hasActiveItem()) {
+						controller.removeToken(point);
+						updateMarks();
+					}
 				}
 			}
 		}
@@ -456,10 +473,18 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
+			if (e.getButton() == MouseEvent.BUTTON1)
+				button1Pressed = true;
+			if (e.getButton() == MouseEvent.BUTTON3)
+				button3Pressed = true;
 		}
 
 		@Override
-		public void mouseReleased(MouseEvent arg0) {
+		public void mouseReleased(MouseEvent e) {
+			if (e.getButton() == MouseEvent.BUTTON1)
+				button1Pressed = false;
+			if (e.getButton() == MouseEvent.BUTTON3)
+				button3Pressed = false;
 		}
 
 		@Override
@@ -470,9 +495,10 @@ public class MainFrame extends JFrame {
 			mouseX = e.getX();
 			mouseY = e.getY();
 
-			pdfViewPanel.move(dX, dY);
-			pdfViewPanel.repaint();
-
+			if (button1Pressed) {
+				pdfViewPanel.move(dX, dY);
+				pdfViewPanel.repaint();
+			}
 		}
 
 		@Override
