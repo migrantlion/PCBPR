@@ -1,13 +1,11 @@
 package com.plancrawler.view;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -32,8 +30,6 @@ public class NavToolbar extends JToolBar {
 	private int MINPAGE = 1;
 
 	public NavToolbar() {
-//		setLayout(new FlowLayout(FlowLayout.LEFT));
-//		setBorder(BorderFactory.createEtchedBorder());
 		intialize();
 	}
 

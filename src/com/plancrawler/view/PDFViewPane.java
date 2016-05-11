@@ -46,7 +46,6 @@ public class PDFViewPane extends JPanel {
 	public void setImage(BufferedImage image) {
 		this.image = image;
 		this.originalImage = image;
-		scaleImage();
 	}
 
 	public void fitImage() {
@@ -59,7 +58,7 @@ public class PDFViewPane extends JPanel {
 			return;
 		else {
 			image = originalImage;
-			scale = Math.min((double) (screenH)/(double)(image.getHeight()), (double)(screenW ) / (double) (image.getWidth()));
+			scale = Math.min((double) (screenH)/(double)(originalImage.getHeight()), (double)(screenW ) / (double) (originalImage.getWidth()));
 
 			minScale = 0.25 * scale;
 			origin.setTo(0., 0.);
@@ -75,7 +74,7 @@ public class PDFViewPane extends JPanel {
 		if (image != null) {
 			image = Scalr.resize(originalImage, Scalr.Method.QUALITY,
 					(int) (Math.floor(scale * originalImage.getWidth())),
-					(int) (Math.floor(scale * image.getHeight())));
+					(int) (Math.floor(scale * originalImage.getHeight())));
 		}
 		repaint();
 	}
@@ -84,7 +83,7 @@ public class PDFViewPane extends JPanel {
 		if (image != null) {
 			image = Scalr.resize(originalImage, Scalr.Method.BALANCED,
 					(int) (Math.floor(scale * originalImage.getWidth())),
-					(int) (Math.floor(scale * image.getHeight())));
+					(int) (Math.floor(scale * originalImage.getHeight())));
 		}
 		repaint();
 	}
@@ -98,7 +97,7 @@ public class PDFViewPane extends JPanel {
 		if (image != null)
 			image = Scalr.resize(originalImage, Scalr.Method.SPEED,
 					(int) (Math.floor(scale * originalImage.getWidth())),
-					(int) (Math.floor(scale * image.getHeight())));
+					(int) (Math.floor(scale * originalImage.getHeight())));
 
 		repaint();
 	}

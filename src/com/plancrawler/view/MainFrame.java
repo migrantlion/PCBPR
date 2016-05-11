@@ -6,7 +6,13 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
@@ -21,15 +27,18 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
+import javax.swing.event.MouseInputListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.plancrawler.controller.Controller;
+import com.plancrawler.model.utilities.MyPoint;
 
 public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private NavToolbar navToolbar;
-	private RotateToolbarPanel rotToolbar;
+	private RotateToolbar rotToolbar;
+	private FocusToolbar focusToolbar;
 	private ItemFormPanel itemFormPanel;
 	private TablePanel tablePanel;
 	private PDFViewPane pdfViewPanel;
@@ -88,9 +97,13 @@ public class MainFrame extends JFrame {
 	}
 
 	private void addCenterComponents() {
+		MouseHandler handler = new MouseHandler();
 		JTabbedPane centerTabPane = new JTabbedPane();
 
 		pdfViewPanel = new PDFViewPane();
+		pdfViewPanel.addMouseListener(handler);
+		pdfViewPanel.addMouseWheelListener(handler);
+		pdfViewPanel.addMouseMotionListener(handler);
 
 		tablePanel = new TablePanel();
 		tablePanel.setData(controller.getItems());
@@ -110,11 +123,29 @@ public class MainFrame extends JFrame {
 		navToolbar.addNavListener((page) -> changePage(page));
 		northPanel.add(navToolbar);
 
-		rotToolbar = new RotateToolbarPanel();
-		rotToolbar.addRotToolbarListener((e) -> controller.handlePageRotation(e));
+		focusToolbar = new FocusToolbar();
+		focusToolbar.addFocusToolbarListener((e) -> {
+			SwingWorker<Void,Void> focusworker = new SwingWorker<Void,Void>(){
+				protected Void doInBackground() throws Exception {
+					pdfViewPanel.focus();
+					return null;
+				}				
+			};
+			if (e.isFitToScreenRequested())
+				pdfViewPanel.fitImage();
+			if (e.isFocusRequested())
+				focusworker.execute();
+		});
+		northPanel.add(focusToolbar);
+
+		rotToolbar = new RotateToolbar();
+		rotToolbar.addRotToolbarListener((e) -> {
+			controller.handlePageRotation(e);
+			changePage(controller.getCurrentPage());
+		});
 
 		northPanel.add(rotToolbar);
-
+		setToolbarFloat(false); // initially set all to locked
 		this.add(northPanel, BorderLayout.PAGE_START);
 	}
 
@@ -127,6 +158,12 @@ public class MainFrame extends JFrame {
 					+ e.getItemColor().toString());
 		});
 		this.add(itemFormPanel, BorderLayout.WEST);
+	}
+
+	private void setToolbarFloat(boolean state) {
+		navToolbar.setFloatable(state);
+		rotToolbar.setFloatable(state);
+		focusToolbar.setFloatable(state);
 	}
 
 	private class PCMenuBar extends JMenuBar {
@@ -255,16 +292,8 @@ public class MainFrame extends JFrame {
 			windowMenu.setMnemonic(KeyEvent.VK_W);
 
 			JCheckBoxMenuItem lockToolbar = new JCheckBoxMenuItem("Lock toolbar");
-			lockToolbar.setSelected(false);
-			lockToolbar.addActionListener((e) -> {
-				if (navToolbar.isFloatable()) {
-					navToolbar.setFloatable(false);
-					rotToolbar.setFloatable(false);
-				} else {
-					navToolbar.setFloatable(true);
-					rotToolbar.setFloatable(true);
-				}
-			});
+			lockToolbar.setSelected(true);
+			lockToolbar.addActionListener((e) -> setToolbarFloat(!lockToolbar.isSelected()));
 			windowMenu.add(lockToolbar);
 
 			JMenu showToolbarMenu = new JMenu("Show Toolbar");
@@ -296,7 +325,7 @@ public class MainFrame extends JFrame {
 				itemFormPanel.setVisible(menuItem.isSelected());
 			});
 			showPaneMenu.add(addItemWindow);
-			
+
 			windowMenu.add(showPaneMenu);
 
 			this.add(windowMenu);
@@ -318,6 +347,104 @@ public class MainFrame extends JFrame {
 			JMenuItem aboutMenuItem = new JMenuItem("About");
 			aboutMenu.add(aboutMenuItem);
 			this.add(aboutMenu);
+		}
+	}
+	
+	private class MouseHandler implements MouseWheelListener, MouseInputListener, MouseMotionListener {
+		private int mouseX, mouseY;
+		private boolean needsFocus = false;
+		private boolean isAlreadyOneClick = false;
+		MyPoint pt1;
+
+		@Override
+		public void mouseWheelMoved(MouseWheelEvent e) {
+			double notches = e.getWheelRotation();
+			pdfViewPanel.rescale((1 - notches / 10), e.getX(), e.getY());
+			needsFocus = true;
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+//			if (!measRibbon.isMeasuring()) {
+//				pt1 = null;
+//				if (e.getSource().equals(pdfViewPanel) && hasActiveItem()) {
+//					if (isAlreadyOneClick) {
+//						System.out.println("double click");
+//						if (e.getButton() == 3)
+//							changeItemInfo();
+//						isAlreadyOneClick = false;
+//					} else {
+//						isAlreadyOneClick = true;
+//						Timer t = new Timer("doubleclickTimer", false);
+//						t.schedule(new TimerTask() {
+//							@Override
+//							public void run() {
+//								// if oneClick is on, then it must have been a
+//								// single click
+//								if (isAlreadyOneClick) {
+//									if (e.getButton() == 1)
+//										addToTakeOff(new MyPoint(e.getX(), e.getY()));
+//									else if (e.getButton() == 3)
+//										removeFromTakeOff(new MyPoint(e.getX(), e.getY()));
+//								}
+//								isAlreadyOneClick = false;
+//							}
+//						}, 500);
+//					}
+//				} else if (e.getSource().equals(centerScreen) && e.getButton() == 3)
+//					removeFromTakeOff(new MyPoint(e.getX(), e.getY()));
+//			} else { // measuring
+//				if (pt1 == null) {
+//					MyPoint screenPt = new MyPoint(e.getX(), e.getY());
+//					pt1 = centerScreen.getImageRelativePoint(screenPt);
+//					measRibbon.setFirst(pt1);
+//				} else {
+//					MyPoint screenPt = new MyPoint(e.getX(), e.getY());
+//					MyPoint pt2 = centerScreen.getImageRelativePoint(screenPt);
+//					measRibbon.doMeasurement(pt1, pt2);
+//					pt1 = null;
+//				}
+//			}
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+		}
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			int dX = e.getX() - mouseX;
+			int dY = e.getY() - mouseY;
+
+			mouseX = e.getX();
+			mouseY = e.getY();
+
+			pdfViewPanel.move(dX, dY);
+			pdfViewPanel.repaint();
+
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			mouseX = e.getX();
+			mouseY = e.getY();
+//			measRibbon.setCurrent(centerScreen.getImageRelativePoint(new MyPoint(mouseX, mouseY)));
+			if (needsFocus) {
+				pdfViewPanel.quickFocus();
+				needsFocus = false;
+			}
 		}
 	}
 }

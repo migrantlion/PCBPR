@@ -51,7 +51,10 @@ public class Controller {
 	}
 
 	public void handlePageRotation(RotToolbarEvent e) {
-		System.out.println("rotation : " + e.getRotation() + "  all: " + e.isRotAll());
+		if (e.getRotation() != 0)
+			pdfDoc.registerRotation(e.getRotation());
+		if (e.isRotAll())
+			pdfDoc.registerRotationToAllPages();
 	}
 
 	public void saveToFile(File file) throws IOException {
