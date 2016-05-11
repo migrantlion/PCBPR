@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class Item implements Serializable {
+public class Item implements Serializable, Comparable<Item> {
 
 	private static final long serialVersionUID = 1L;
 	private static int counter = 0;
@@ -104,5 +104,13 @@ public class Item implements Serializable {
 
 	public int getId() {
 		return id;
+	}
+
+	@Override
+	public int compareTo(Item other) {
+		if (this.category == other.category)
+			return this.name.compareTo(other.name);
+		else
+			return this.category.compareTo(other.category);
 	}
 }

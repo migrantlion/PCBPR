@@ -3,6 +3,7 @@ package com.plancrawler.view;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -11,8 +12,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
@@ -31,6 +30,7 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.plancrawler.controller.Controller;
+import com.plancrawler.model.Location;
 import com.plancrawler.model.utilities.MyPoint;
 
 public class MainFrame extends JFrame {
@@ -42,6 +42,7 @@ public class MainFrame extends JFrame {
 	private ItemFormPanel itemFormPanel;
 	private TablePanel tablePanel;
 	private PDFViewPane pdfViewPanel;
+	private ItemSelectionPanel itemSelectPanel;
 
 	private Controller controller = new Controller();
 
@@ -96,24 +97,6 @@ public class MainFrame extends JFrame {
 		addCenterComponents();
 	}
 
-	private void addCenterComponents() {
-		MouseHandler handler = new MouseHandler();
-		JTabbedPane centerTabPane = new JTabbedPane();
-
-		pdfViewPanel = new PDFViewPane();
-		pdfViewPanel.addMouseListener(handler);
-		pdfViewPanel.addMouseWheelListener(handler);
-		pdfViewPanel.addMouseMotionListener(handler);
-
-		tablePanel = new TablePanel();
-		tablePanel.setData(controller.getItems());
-
-		centerTabPane.addTab("PDF View", pdfViewPanel);
-		centerTabPane.addTab("Item View", tablePanel);
-
-		this.add(centerTabPane, BorderLayout.CENTER);
-	}
-
 	private void addToolbarComponents() {
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -125,11 +108,11 @@ public class MainFrame extends JFrame {
 
 		focusToolbar = new FocusToolbar();
 		focusToolbar.addFocusToolbarListener((e) -> {
-			SwingWorker<Void,Void> focusworker = new SwingWorker<Void,Void>(){
+			SwingWorker<Void, Void> focusworker = new SwingWorker<Void, Void>() {
 				protected Void doInBackground() throws Exception {
 					pdfViewPanel.focus();
 					return null;
-				}				
+				}
 			};
 			if (e.isFitToScreenRequested())
 				pdfViewPanel.fitImage();
@@ -149,15 +132,52 @@ public class MainFrame extends JFrame {
 		this.add(northPanel, BorderLayout.PAGE_START);
 	}
 
+	private void addCenterComponents() {
+		MouseHandler handler = new MouseHandler();
+		JTabbedPane centerTabPane = new JTabbedPane();
+
+		pdfViewPanel = new PDFViewPane();
+		pdfViewPanel.addMouseListener(handler);
+		pdfViewPanel.addMouseWheelListener(handler);
+		pdfViewPanel.addMouseMotionListener(handler);
+
+		tablePanel = new TablePanel();
+		tablePanel.setData(controller.getItems());
+
+		centerTabPane.addTab("PDF View", pdfViewPanel);
+		centerTabPane.addTab("Item View", tablePanel);
+
+		this.add(centerTabPane, BorderLayout.CENTER);
+	}
+
 	private void addWestComponents() {
+		JPanel westPanel = new JPanel();
+		westPanel.setLayout(new GridLayout(0, 1));
+
 		itemFormPanel = new ItemFormPanel();
 		itemFormPanel.addFormListener((e) -> {
 			controller.addItem(e);
 			tablePanel.refresh();
-			System.out.println(e.getItemName() + ": " + e.getItemDesc() + ", " + e.getItemCat() + ".  color: "
-					+ e.getItemColor().toString());
+			itemSelectPanel.refresh();
 		});
-		this.add(itemFormPanel, BorderLayout.WEST);
+		westPanel.add(itemFormPanel);
+
+		itemSelectPanel = new ItemSelectionPanel();
+		itemSelectPanel.setData(controller.getItems());
+		itemSelectPanel.addItemSelectionListener((e) -> {
+			controller.setActiveItemRow(e.getRow());
+			if (e.isDeleteRequest()) {
+				controller.deleteItemRow(e.getRow());
+				tablePanel.refresh();
+				itemSelectPanel.refresh();
+			} else if (e.isModifyRequest()) {
+				System.out.println("Modify was requested of row " + e.getRow());
+			}
+		});
+		westPanel.add(itemSelectPanel);
+
+		this.add(westPanel, BorderLayout.WEST);
+
 	}
 
 	private void setToolbarFloat(boolean state) {
@@ -349,7 +369,7 @@ public class MainFrame extends JFrame {
 			this.add(aboutMenu);
 		}
 	}
-	
+
 	private class MouseHandler implements MouseWheelListener, MouseInputListener, MouseMotionListener {
 		private int mouseX, mouseY;
 		private boolean needsFocus = false;
@@ -365,47 +385,55 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-//			if (!measRibbon.isMeasuring()) {
-//				pt1 = null;
-//				if (e.getSource().equals(pdfViewPanel) && hasActiveItem()) {
-//					if (isAlreadyOneClick) {
-//						System.out.println("double click");
-//						if (e.getButton() == 3)
-//							changeItemInfo();
-//						isAlreadyOneClick = false;
-//					} else {
-//						isAlreadyOneClick = true;
-//						Timer t = new Timer("doubleclickTimer", false);
-//						t.schedule(new TimerTask() {
-//							@Override
-//							public void run() {
-//								// if oneClick is on, then it must have been a
-//								// single click
-//								if (isAlreadyOneClick) {
-//									if (e.getButton() == 1)
-//										addToTakeOff(new MyPoint(e.getX(), e.getY()));
-//									else if (e.getButton() == 3)
-//										removeFromTakeOff(new MyPoint(e.getX(), e.getY()));
-//								}
-//								isAlreadyOneClick = false;
-//							}
-//						}, 500);
-//					}
-//				} else if (e.getSource().equals(centerScreen) && e.getButton() == 3)
-//					removeFromTakeOff(new MyPoint(e.getX(), e.getY()));
-//			} else { // measuring
-//				if (pt1 == null) {
-//					MyPoint screenPt = new MyPoint(e.getX(), e.getY());
-//					pt1 = centerScreen.getImageRelativePoint(screenPt);
-//					measRibbon.setFirst(pt1);
-//				} else {
-//					MyPoint screenPt = new MyPoint(e.getX(), e.getY());
-//					MyPoint pt2 = centerScreen.getImageRelativePoint(screenPt);
-//					measRibbon.doMeasurement(pt1, pt2);
-//					pt1 = null;
-//				}
-//			}
+			if (e.getSource() == pdfViewPanel) {
+				MyPoint point = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
+				if (controller.hasActiveItem()) {
+					controller.dropToken(point);
+					pdfViewPanel.setDisplayMarks(controller.getPaintables(controller.getCurrentPage()));
+				}
+			}
 		}
+		// if (!measRibbon.isMeasuring()) {
+		// pt1 = null;
+		// if (e.getSource().equals(pdfViewPanel) && hasActiveItem()) {
+		// if (isAlreadyOneClick) {
+		// System.out.println("double click");
+		// if (e.getButton() == 3)
+		// changeItemInfo();
+		// isAlreadyOneClick = false;
+		// } else {
+		// isAlreadyOneClick = true;
+		// Timer t = new Timer("doubleclickTimer", false);
+		// t.schedule(new TimerTask() {
+		// @Override
+		// public void run() {
+		// // if oneClick is on, then it must have been a
+		// // single click
+		// if (isAlreadyOneClick) {
+		// if (e.getButton() == 1)
+		// addToTakeOff(new MyPoint(e.getX(), e.getY()));
+		// else if (e.getButton() == 3)
+		// removeFromTakeOff(new MyPoint(e.getX(), e.getY()));
+		// }
+		// isAlreadyOneClick = false;
+		// }
+		// }, 500);
+		// }
+		// } else if (e.getSource().equals(centerScreen) && e.getButton() == 3)
+		// removeFromTakeOff(new MyPoint(e.getX(), e.getY()));
+		// } else { // measuring
+		// if (pt1 == null) {
+		// MyPoint screenPt = new MyPoint(e.getX(), e.getY());
+		// pt1 = centerScreen.getImageRelativePoint(screenPt);
+		// measRibbon.setFirst(pt1);
+		// } else {
+		// MyPoint screenPt = new MyPoint(e.getX(), e.getY());
+		// MyPoint pt2 = centerScreen.getImageRelativePoint(screenPt);
+		// measRibbon.doMeasurement(pt1, pt2);
+		// pt1 = null;
+		// }
+		// }
+		// }
 
 		@Override
 		public void mouseEntered(MouseEvent arg0) {
@@ -440,7 +468,8 @@ public class MainFrame extends JFrame {
 		public void mouseMoved(MouseEvent e) {
 			mouseX = e.getX();
 			mouseY = e.getY();
-//			measRibbon.setCurrent(centerScreen.getImageRelativePoint(new MyPoint(mouseX, mouseY)));
+			// measRibbon.setCurrent(centerScreen.getImageRelativePoint(new
+			// MyPoint(mouseX, mouseY)));
 			if (needsFocus) {
 				pdfViewPanel.quickFocus();
 				needsFocus = false;

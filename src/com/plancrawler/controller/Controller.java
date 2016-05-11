@@ -10,7 +10,10 @@ import java.util.List;
 import com.plancrawler.model.DocumentHandler;
 import com.plancrawler.model.Item;
 import com.plancrawler.model.ItemDatabase;
+import com.plancrawler.model.ItemLocations;
+import com.plancrawler.model.Location;
 import com.plancrawler.model.Tokens;
+import com.plancrawler.model.utilities.MyPoint;
 import com.plancrawler.view.support.ItemFormEvent;
 import com.plancrawler.view.support.Paintable;
 import com.plancrawler.view.support.RotToolbarEvent;
@@ -19,6 +22,7 @@ public class Controller {
 
 	private ItemDatabase db;
 	private DocumentHandler pdfDoc;
+	private int activeItemRow = -1;
 
 	public Controller() {
 		this.db = ItemDatabase.getInstance();
@@ -33,7 +37,7 @@ public class Controller {
 		}
 		return pdfDoc.getCurrentFile();
 	}
-	
+
 	public List<Item> getItems() {
 		return db.getItems();
 	}
@@ -65,17 +69,17 @@ public class Controller {
 		db.loadFromFile(file);
 	}
 
-	public List<Paintable> getPaintables(int page, List<String> displayList) {
+	public List<Paintable> getPaintables(int page) {
 		List<Item> items = getItems();
 		List<TokenPainter> tokenPainter = new ArrayList<TokenPainter>();
 		List<Paintable> paintable = new ArrayList<Paintable>();
 
 		for (Item i : items) {
-			if (isInDisplayList(i, displayList)) {
-				List<Tokens> tokens = i.getTokensOnPage(page);
-				for (Tokens t : tokens)
-					tokenPainter.add(new TokenPainter(t));
-			}
+
+			List<Tokens> tokens = i.getTokensOnPage(page);
+			for (Tokens t : tokens)
+				tokenPainter.add(new TokenPainter(t));
+
 		}
 		paintable.addAll(tokenPainter);
 		return paintable;
@@ -96,16 +100,42 @@ public class Controller {
 	public BufferedImage getCurrentPageImage() {
 		return pdfDoc.getCurrentPageImage();
 	}
-	
+
 	public BufferedImage getPageImage(int page) {
 		return pdfDoc.getPageImage(page);
 	}
-	
-	public int getCurrentPage(){
+
+	public int getCurrentPage() {
 		return pdfDoc.getCurrentPage();
 	}
-	
-	public int getNumPages(){
+
+	public int getNumPages() {
 		return pdfDoc.getNumPages();
 	}
+
+	public void deleteItemRow(int row) {
+		db.deleteRow(row);
+		activeItemRow = -1;
+	}
+
+	public int getActiveItemRow() {
+		return activeItemRow;
+	}
+
+	public void setActiveItemRow(int activeItemRow) {
+		this.activeItemRow = activeItemRow;
+	}
+
+	public boolean hasActiveItem() {
+		return activeItemRow >= 0;
+	}
+
+	public void dropToken(MyPoint point) {
+		if (hasActiveItem()) {
+			Location loc = new Location(activeItemRow, point, ItemLocations.ON_PAGE);
+			db.addTokenToItem(loc, activeItemRow);
+		}
+
+	}
+
 }

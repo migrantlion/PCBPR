@@ -26,10 +26,42 @@ public class ItemDatabase {
 	
 	public void addItem(Item item) {
 		items.add(item);
+		Collections.sort(items);
 	}
 	
 	public boolean remItem(Item item) {
 		return items.remove(item);
+	}
+	
+	public void addTokenToItem(Location loc, int activeItemRow){
+		Item i = getItem(activeItemRow);
+		if (i == null){
+			System.err.println("Unknown row ("+activeItemRow+") requested");
+		} else
+			i.addToken(loc);
+	}
+	
+	public boolean remTokenFromItem(Location loc, Item item){
+		Item i = getItem(item);
+		if (i == null)
+			return false;
+		else
+			return i.remToken(loc);
+	}
+	
+	private Item getItem(Item item){
+		Item returnItem = null;
+		for (Item i : items)
+			if (i.equals(item))
+				returnItem = i;
+		return returnItem;
+	}
+	
+	private Item getItem(int index){
+		if (index < 0 || index > items.size())
+			return null;
+		else
+			return items.get(index);
 	}
 	
 	public List<Item> getItems(){
@@ -59,6 +91,12 @@ public class ItemDatabase {
 			e.printStackTrace();
 		}	
 		ois.close();
+	}
+
+	public void deleteRow(int row) {
+		if (row < 0 || row > items.size())
+			return;
+		items.remove(row);		
 	}
 }
 

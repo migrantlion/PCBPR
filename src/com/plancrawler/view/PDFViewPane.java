@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.BorderFactory;
@@ -30,7 +31,7 @@ public class PDFViewPane extends JPanel {
 	private double scale = 1;
 
 	private BufferedImage image, originalImage;
-	private CopyOnWriteArrayList<Paintable> marks = new CopyOnWriteArrayList<Paintable>();
+	private List<Paintable> marks = new CopyOnWriteArrayList<Paintable>();
 
 	public PDFViewPane() {
 		this.image = null;
@@ -168,8 +169,8 @@ public class PDFViewPane extends JPanel {
 		return imagePoint;
 	}
 
-	public void displayMarks(CopyOnWriteArrayList<Paintable> marks) {
-		this.marks = marks;
+	public void setDisplayMarks(List<Paintable> list) {
+		this.marks = list;
 	}
 
 }
