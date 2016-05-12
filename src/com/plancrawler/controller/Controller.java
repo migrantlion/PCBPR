@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.SwingUtilities;
-
 import com.plancrawler.model.Database;
 import com.plancrawler.model.DocumentHandler;
 import com.plancrawler.model.Item;
@@ -180,5 +178,14 @@ public class Controller {
 	
 	public boolean isMeasuring(){
 		return isMeasuring;
+	}
+
+	public Item getItem(int row) {
+		return db.getItem(row);
+	}
+
+	public void modifyItem(int row, ItemFormEvent ife) {
+		Item item = new Item(ife.getItemName(), ife.getItemDesc(), ife.getItemCat(), ife.getItemColor());
+		db.modifyEntry(row, item);	
 	}
 }

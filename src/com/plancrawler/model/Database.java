@@ -67,7 +67,7 @@ public class Database {
 			return i.remToken(loc);
 	}
 	
-	private Item getItem(int index){
+	public Item getItem(int index){
 		if (index < 0 || index > items.size())
 			return null;
 		else
@@ -142,6 +142,18 @@ public class Database {
 		}
 		for (Measurement m : remList)
 			measurements.remove(m);
+	}
+
+	public void modifyEntry(int index, Item item) {
+		Item entry = getItem(index);
+		if (entry == null)
+			addItem(item);
+		else {
+			entry.setName(item.getName());
+			entry.setDescription(item.getDescription());
+			entry.setCategory(item.getCategory());
+			entry.setColor(item.getColor());
+		}
 	}
 	
 }

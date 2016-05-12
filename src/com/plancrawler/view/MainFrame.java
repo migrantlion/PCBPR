@@ -7,7 +7,6 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
@@ -33,9 +32,10 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.plancrawler.controller.Controller;
-import com.plancrawler.controller.MeasurePainter;
 import com.plancrawler.controller.Paintable;
 import com.plancrawler.model.utilities.MyPoint;
+import com.plancrawler.view.dialogs.ItemModifyDialog;
+import com.plancrawler.view.support.ItemFormEvent;
 import com.plancrawler.view.toolbars.FocusToolbar;
 import com.plancrawler.view.toolbars.MeasureToolbar;
 import com.plancrawler.view.toolbars.NavToolbar;
@@ -190,8 +190,9 @@ public class MainFrame extends JFrame {
 				controller.deleteItemRow(e.getRow());
 				refreshTables();
 			} else if (e.isModifyRequest()) {
-				//TODO: needs code here
-				System.out.println("Modify was requested of row " + e.getRow());
+				ItemFormEvent ife = ItemModifyDialog.modifyItem(controller.getItem(e.getRow()), itemSelectPanel);
+				controller.modifyItem(e.getRow(), ife);
+				refreshTables();
 			}
 		});
 		westPanel.add(itemSelectPanel);

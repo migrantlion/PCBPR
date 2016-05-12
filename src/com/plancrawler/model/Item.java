@@ -108,6 +108,8 @@ public class Item implements Serializable, Comparable<Item> {
 
 	public void setColor(Color color) {
 		this.color = color;
+		for (Tokens t: tokens)
+			t.setColor(color);
 	}
 
 	public CopyOnWriteArrayList<Tokens> getTokens() {
