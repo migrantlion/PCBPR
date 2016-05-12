@@ -6,7 +6,6 @@ import java.awt.Graphics2D;
 import com.plancrawler.model.Location;
 import com.plancrawler.model.Tokens;
 import com.plancrawler.model.utilities.MyPoint;
-import com.plancrawler.view.support.Paintable;
 
 public class TokenPainter extends Tokens implements Paintable {
 

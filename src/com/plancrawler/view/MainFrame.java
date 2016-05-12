@@ -34,8 +34,13 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.plancrawler.controller.Controller;
 import com.plancrawler.controller.MeasurePainter;
+import com.plancrawler.controller.Paintable;
 import com.plancrawler.model.utilities.MyPoint;
-import com.plancrawler.view.support.Paintable;
+import com.plancrawler.view.toolbars.FocusToolbar;
+import com.plancrawler.view.toolbars.MeasureToolbar;
+import com.plancrawler.view.toolbars.NavToolbar;
+import com.plancrawler.view.toolbars.RotateToolbar;
+import com.plancrawler.view.toolbars.SaveLoadToolbar;
 
 public class MainFrame extends JFrame {
 
@@ -185,6 +190,7 @@ public class MainFrame extends JFrame {
 				controller.deleteItemRow(e.getRow());
 				refreshTables();
 			} else if (e.isModifyRequest()) {
+				//TODO: needs code here
 				System.out.println("Modify was requested of row " + e.getRow());
 			}
 		});
@@ -197,7 +203,6 @@ public class MainFrame extends JFrame {
 	private void refreshTables() {
 		tablePanel.refresh();
 		itemSelectPanel.refresh();
-
 		// if tables are updated, then Marks probably need to be as well
 		updateMarks();
 	}

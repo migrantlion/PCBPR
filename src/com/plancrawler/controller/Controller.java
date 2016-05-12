@@ -18,8 +18,7 @@ import com.plancrawler.model.Measurement;
 import com.plancrawler.model.Tokens;
 import com.plancrawler.model.utilities.MyPoint;
 import com.plancrawler.view.support.ItemFormEvent;
-import com.plancrawler.view.support.Paintable;
-import com.plancrawler.view.support.RotToolbarEvent;
+import com.plancrawler.view.toolbars.RotToolbarEvent;
 
 public class Controller {
 

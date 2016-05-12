@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 
 import com.plancrawler.model.Measurement;
 import com.plancrawler.model.utilities.MyPoint;
-import com.plancrawler.view.support.Paintable;
 
 
 public class MeasurePainter extends Measurement implements Paintable {

@@ -15,8 +15,8 @@ import javax.swing.border.BevelBorder;
 
 import org.imgscalr.Scalr;
 
+import com.plancrawler.controller.Paintable;
 import com.plancrawler.model.utilities.MyPoint;
-import com.plancrawler.view.support.Paintable;
 
 
 
