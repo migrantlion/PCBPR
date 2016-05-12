@@ -90,6 +90,7 @@ public class Database {
 		oos.writeObject(itemArray);
 		oos.writeObject(mArray);
 		oos.writeObject(associatedPDFName);
+		oos.writeObject(warehouse);
 		
 		oos.close();
 	}
@@ -102,6 +103,7 @@ public class Database {
 			Item[] itemArray = (Item[]) ois.readObject();
 			Measurement[] mArray = (Measurement[]) ois.readObject();
 			associatedPDFName = (String) ois.readObject();
+			warehouse = (CrateDatabase) ois.readObject();
 			
 			items.clear();
 			items.addAll(Arrays.asList(itemArray));
