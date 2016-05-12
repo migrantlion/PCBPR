@@ -16,28 +16,28 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 
 import com.plancrawler.model.Item;
-import com.plancrawler.view.support.ItemSelectionEvent;
-import com.plancrawler.view.support.ItemSelectionListener;
+import com.plancrawler.view.support.TableItemSelectionEvent;
+import com.plancrawler.view.support.TableItemSelectionListener;
 import com.plancrawler.view.support.ItemSelectionTableModel;
 import com.plancrawler.view.support.ItemSelectionTableRenderer;
 
 public class ItemSelectionPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private JTable table; 
+	private JTable table;
 	private ItemSelectionTableModel tableModel = new ItemSelectionTableModel();
 	private JPopupMenu popup = new JPopupMenu();
-	private List<ItemSelectionListener> listeners = new ArrayList<ItemSelectionListener>();
-	
-	public ItemSelectionPanel(){
+	private List<TableItemSelectionListener> listeners = new ArrayList<TableItemSelectionListener>();
+
+	public ItemSelectionPanel() {
 		this.table = new JTable(tableModel);
 		ItemSelectionTableRenderer renderer = new ItemSelectionTableRenderer();
 		table.setDefaultRenderer(table.getColumnClass(0), renderer);
 		setupPanel();
 		addButtons();
 	}
-	
-	private void setupPanel(){
+
+	private void setupPanel() {
 		Dimension dim = getPreferredSize();
 		dim.width = 250;
 		setPreferredSize(dim);
@@ -46,65 +46,63 @@ public class ItemSelectionPanel extends JPanel {
 		Border outerBorder = BorderFactory.createEtchedBorder();
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		setLayout(new BorderLayout());
-		
-		table.addMouseListener(new MouseAdapter(){
+
+		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				int row = table.rowAtPoint(e.getPoint());
 				table.getSelectionModel().setSelectionInterval(row, row);
-				if (e.getButton() == MouseEvent.BUTTON3){
+				if (e.getButton() == MouseEvent.BUTTON3) {
 					popup.show(table, e.getX(), e.getY());
 				}
-				alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, row, false, false));
+				alertListeners(new TableItemSelectionEvent(ItemSelectionPanel.this, row, false, false));
 			}
-			
 		});
-		
+
 		add(new JScrollPane(table), BorderLayout.CENTER);
 	}
 
-	private void addButtons(){
+	private void addButtons() {
 		JMenuItem clearSelectItem = new JMenuItem("de-select");
-		clearSelectItem.addActionListener((e)->{
+		clearSelectItem.addActionListener((e) -> {
 			table.clearSelection();
-			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, -1, false, false));
+			alertListeners(new TableItemSelectionEvent(ItemSelectionPanel.this, -1, false, false));
 		});
 		popup.add(clearSelectItem);
-		
+
 		JMenuItem remItem = new JMenuItem("delte row");
-		remItem.addActionListener((e)->{
+		remItem.addActionListener((e) -> {
 			int row = table.getSelectedRow();
-			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, row, false, true));
+			alertListeners(new TableItemSelectionEvent(ItemSelectionPanel.this, row, false, true));
 		});
 		popup.add(remItem);
-		
+
 		JMenuItem changeItem = new JMenuItem("modify row");
-		changeItem.addActionListener((e)->{
+		changeItem.addActionListener((e) -> {
 			int row = table.getSelectedRow();
-			alertListeners(new ItemSelectionEvent(ItemSelectionPanel.this, row, true, false));
+			alertListeners(new TableItemSelectionEvent(ItemSelectionPanel.this, row, true, false));
 		});
 		popup.add(changeItem);
 	}
-		
-	private void alertListeners(ItemSelectionEvent itemSelectionEvent) {
-		for (ItemSelectionListener l : listeners)
+
+	private void alertListeners(TableItemSelectionEvent itemSelectionEvent) {
+		for (TableItemSelectionListener l : listeners)
 			l.itemSelectionProcessed(itemSelectionEvent);
 	}
-	
-	public void addItemSelectionListener(ItemSelectionListener l){
+
+	public void addItemSelectionListener(TableItemSelectionListener l) {
 		listeners.add(l);
 	}
 
-	public boolean remItemSelectionListener(ItemSelectionListener l){
+	public boolean remItemSelectionListener(TableItemSelectionListener l) {
 		return listeners.remove(l);
 	}
 
 	public void setData(List<Item> db) {
 		tableModel.setData(db);
 	}
-	
+
 	public void refresh() {
 		tableModel.fireTableDataChanged();
 	}
 }
-

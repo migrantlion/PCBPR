@@ -2,18 +2,18 @@ package com.plancrawler.view.support;
 
 import java.util.EventObject;
 
-public class ItemSelectionEvent extends EventObject {
+public class TableItemSelectionEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
 	private boolean modifyRequest;
 	private int row;
 	private boolean deleteRequest;
 	
-	public ItemSelectionEvent(Object source) {
+	public TableItemSelectionEvent(Object source) {
 		super(source);
 	}
 	
-	public ItemSelectionEvent(Object source, int row, boolean modify, boolean delete){
+	public TableItemSelectionEvent(Object source, int row, boolean modify, boolean delete){
 		super(source);
 		this.row = row;
 		this.modifyRequest = modify;

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ public class CrateDatabase implements Serializable {
 
 	public void addCrate(Crate crate) {
 		crates.add(crate);
+		Collections.sort(crates);
 	}
 
 	public boolean remCrate(Crate crate) {
@@ -64,5 +66,13 @@ public class CrateDatabase implements Serializable {
 			e.printStackTrace();
 		}
 		ois.close();
+	}
+
+	public List<Item> getItemsInCrate(int crateIndex) {
+		List<Item> returnList = new ArrayList<Item>();
+		if (crateIndex < 0)
+			return Collections.unmodifiableList(returnList);
+		else
+			return getItemsInCrate(crates.get(crateIndex));
 	}
 }

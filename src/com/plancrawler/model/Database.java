@@ -20,10 +20,12 @@ public class Database {
 	private String associatedPDFName = null;
 	private List<Item> items; 
 	private List<Measurement> measurements;
+	private CrateDatabase warehouse;
 	
 	private Database() {
 		items = new LinkedList<Item>();
 		measurements = new LinkedList<Measurement>();
+		warehouse = CrateDatabase.getInstance();
 	}
 	
 	public static Database getInstance() {
@@ -154,6 +156,14 @@ public class Database {
 			entry.setCategory(item.getCategory());
 			entry.setColor(item.getColor());
 		}
+	}
+
+	public List<Crate> getCrates() {
+		return warehouse.getCrates();
+	}
+
+	public List<Item> getItemsInCrate(int crateIndex) {
+		return warehouse.getItemsInCrate(crateIndex);
 	}
 	
 }

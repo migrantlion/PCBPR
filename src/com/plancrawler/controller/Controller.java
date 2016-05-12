@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.plancrawler.model.Crate;
 import com.plancrawler.model.Database;
 import com.plancrawler.model.DocumentHandler;
 import com.plancrawler.model.Item;
@@ -187,5 +188,13 @@ public class Controller {
 	public void modifyItem(int row, ItemFormEvent ife) {
 		Item item = new Item(ife.getItemName(), ife.getItemDesc(), ife.getItemCat(), ife.getItemColor());
 		db.modifyEntry(row, item);	
+	}
+
+	public List<Crate> getCrates() {
+		return db.getCrates();
+	}
+
+	public List<Item> getItemsInCrate(int crateIndex) {
+		return db.getItemsInCrate(crateIndex);
 	}
 }

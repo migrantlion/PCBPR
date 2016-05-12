@@ -24,6 +24,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -56,6 +57,8 @@ public class MainFrame extends JFrame {
 	// Panes
 	private ItemFormPanel itemFormPanel = new ItemFormPanel();
 	private TablePanel tablePanel = new TablePanel();
+	private CrateTablePane cratePanel = new CrateTablePane();
+	private TablePanel itemsInCratePanel = new TablePanel();
 	private PDFViewPane pdfViewPanel = new PDFViewPane();
 	private ItemSelectionPanel itemSelectPanel = new ItemSelectionPanel();
 
@@ -157,9 +160,17 @@ public class MainFrame extends JFrame {
 		pdfViewPanel.addMouseMotionListener(handler);
 
 		tablePanel.setData(controller.getItems());
+		
+		cratePanel.setData(controller.getCrates());
+		itemsInCratePanel.setData(controller.getItemsInCrate(-1));
+		JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, cratePanel, itemsInCratePanel);
+		splitPanel.setDividerLocation(0.5);
+		splitPanel.setOneTouchExpandable(true);
 
 		centerTabPane.addTab("PDF View", pdfViewPanel);
-		centerTabPane.addTab("Item View", tablePanel);
+		centerTabPane.addTab("Take-Off View", tablePanel);
+//		centerTabPane.addTab("Crate View",  cratePanel);
+		centerTabPane.addTab("Crate View", splitPanel);
 
 		this.add(centerTabPane, BorderLayout.CENTER);
 	}
