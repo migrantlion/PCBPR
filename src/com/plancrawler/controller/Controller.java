@@ -16,7 +16,7 @@ import com.plancrawler.model.Location;
 import com.plancrawler.model.Measurement;
 import com.plancrawler.model.Tokens;
 import com.plancrawler.model.utilities.MyPoint;
-import com.plancrawler.view.support.ItemFormEvent;
+import com.plancrawler.view.support.EntryFormEvent;
 import com.plancrawler.view.toolbars.RotToolbarEvent;
 
 public class Controller {
@@ -45,13 +45,13 @@ public class Controller {
 		return db.getItems();
 	}
 
-	public void addItem(ItemFormEvent e) {
+	public void addItem(EntryFormEvent e) {
 		// takes in an itemFormEvent and populates a new item to add to the
 		// database
-		String name = e.getItemName();
-		String desc = e.getItemDesc();
-		String cat = e.getItemCat();
-		Color color = e.getItemColor();
+		String name = e.getEntryName();
+		String desc = e.getEntryDesc();
+		String cat = e.getEntryCat();
+		Color color = e.getEntryColor();
 
 		Item item = new Item(name, desc, cat, color);
 		db.addItem(item);
@@ -185,8 +185,8 @@ public class Controller {
 		return db.getItem(row);
 	}
 
-	public void modifyItem(int row, ItemFormEvent ife) {
-		Item item = new Item(ife.getItemName(), ife.getItemDesc(), ife.getItemCat(), ife.getItemColor());
+	public void modifyItem(int row, EntryFormEvent ife) {
+		Item item = new Item(ife.getEntryName(), ife.getEntryDesc(), ife.getEntryCat(), ife.getEntryColor());
 		db.modifyEntry(row, item);	
 	}
 
@@ -196,5 +196,25 @@ public class Controller {
 
 	public List<Item> getItemsInCrate(int crateIndex) {
 		return db.getItemsInCrate(crateIndex);
+	}
+
+	public boolean hasCrateByName(String name) {
+		List<Crate> crates = db.getCrates();
+		boolean answer = false;
+		for (Crate c : crates)
+			if (c.getName().equals(name))
+				answer = true;
+		return answer;
+	}
+
+	public void addCrate(EntryFormEvent e) {
+		String name = e.getEntryName();
+		String desc = e.getEntryDesc();
+		String cat = e.getEntryCat();
+		Color color = e.getEntryColor();
+
+		Crate crate = new Crate(name, desc, cat, color);
+		db.addCrate(crate);
+		
 	}
 }

@@ -3,6 +3,7 @@ package com.plancrawler.view;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -39,6 +40,10 @@ public class CrateTablePane extends JPanel {
 		Border innerBorder = BorderFactory.createTitledBorder("Package List");
 		Border outerBorder = BorderFactory.createEtchedBorder();
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
+		Dimension dim = getPreferredSize();
+		dim.height = 100;
+		setPreferredSize(dim);
+		setMinimumSize(dim);
 
 		add(new JScrollPane(table), BorderLayout.CENTER);
 

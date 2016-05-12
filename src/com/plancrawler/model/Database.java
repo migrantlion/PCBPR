@@ -167,6 +167,10 @@ public class Database {
 	public List<Item> getItemsInCrate(int crateIndex) {
 		return warehouse.getItemsInCrate(crateIndex);
 	}
+
+	public void addCrate(Crate crate) {
+		warehouse.addCrate(crate);
+	}
 	
 }
 

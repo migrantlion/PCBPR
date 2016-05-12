@@ -36,7 +36,7 @@ import com.plancrawler.controller.Controller;
 import com.plancrawler.controller.Paintable;
 import com.plancrawler.model.utilities.MyPoint;
 import com.plancrawler.view.dialogs.ItemModifyDialog;
-import com.plancrawler.view.support.ItemFormEvent;
+import com.plancrawler.view.support.EntryFormEvent;
 import com.plancrawler.view.toolbars.FocusToolbar;
 import com.plancrawler.view.toolbars.MeasureToolbar;
 import com.plancrawler.view.toolbars.NavToolbar;
@@ -55,7 +55,7 @@ public class MainFrame extends JFrame {
 	private MeasureToolbar measToolbar;
 
 	// Panes
-	private ItemFormPanel itemFormPanel = new ItemFormPanel();
+	private EntryFormPanel entryFormPanel = new EntryFormPanel();
 	private TablePanel tablePanel = new TablePanel();
 	private CrateTablePane cratePanel = new CrateTablePane();
 	private TablePanel itemsInCratePanel = new TablePanel();
@@ -160,16 +160,18 @@ public class MainFrame extends JFrame {
 		pdfViewPanel.addMouseMotionListener(handler);
 
 		tablePanel.setData(controller.getItems());
-		
+
 		cratePanel.setData(controller.getCrates());
 		itemsInCratePanel.setData(controller.getItemsInCrate(-1));
+		// TODO: add listeners to link up changes between cratePanel and
+		// itemsInCratePanel
+
 		JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, cratePanel, itemsInCratePanel);
 		splitPanel.setDividerLocation(0.5);
 		splitPanel.setOneTouchExpandable(true);
 
 		centerTabPane.addTab("PDF View", pdfViewPanel);
 		centerTabPane.addTab("Take-Off View", tablePanel);
-//		centerTabPane.addTab("Crate View",  cratePanel);
 		centerTabPane.addTab("Crate View", splitPanel);
 
 		this.add(centerTabPane, BorderLayout.CENTER);
@@ -179,20 +181,33 @@ public class MainFrame extends JFrame {
 		JPanel westPanel = new JPanel();
 		westPanel.setLayout(new GridLayout(0, 1));
 
-		itemFormPanel.addFormListener((e) -> {
-			int action = JOptionPane.OK_OPTION;
-			if (controller.hasItemByName(e.getItemName())) {
-				action = JOptionPane.showConfirmDialog(MainFrame.this,
-						"Trying to Add a duplicate Item with Name: " + e.getItemName()
-								+ ".\n  Are you sure you want to add this entry?",
-						"Confirm entry", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+		entryFormPanel.addFormListener((e) -> {
+			int action = JOptionPane.OK_OPTION;;
+			if (e.isAddItem()) {
+				if (controller.hasItemByName(e.getEntryName())) {
+					action = JOptionPane.showConfirmDialog(MainFrame.this,
+							"Trying to Add a duplicate Item with Name: " + e.getEntryName()
+									+ ".\n  Are you sure you want to add this entry?",
+							"Confirm entry", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+				}
+				if (action == JOptionPane.OK_OPTION) {
+					controller.addItem(e);
+				}
 			}
-			if (action == JOptionPane.OK_OPTION) {
-				controller.addItem(e);
-				refreshTables();
+			if (e.isAddCrate()) {
+				if (controller.hasCrateByName(e.getEntryName())) {
+					action = JOptionPane.showConfirmDialog(MainFrame.this,
+							"Trying to Add a duplicate Crate with Name: " + e.getEntryName()
+									+ ".\n  Are you sure you want to add this entry?",
+							"Confirm entry", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+				}
+				if (action == JOptionPane.OK_OPTION) {
+					controller.addCrate(e);
+				}
 			}
+			refreshTables();
 		});
-		westPanel.add(itemFormPanel);
+		westPanel.add(entryFormPanel);
 
 		itemSelectPanel.setData(controller.getItems());
 		itemSelectPanel.addItemSelectionListener((e) -> {
@@ -201,7 +216,7 @@ public class MainFrame extends JFrame {
 				controller.deleteItemRow(e.getRow());
 				refreshTables();
 			} else if (e.isModifyRequest()) {
-				ItemFormEvent ife = ItemModifyDialog.modifyItem(controller.getItem(e.getRow()), itemSelectPanel);
+				EntryFormEvent ife = ItemModifyDialog.modifyItem(controller.getItem(e.getRow()), itemSelectPanel);
 				controller.modifyItem(e.getRow(), ife);
 				refreshTables();
 			}
@@ -215,6 +230,8 @@ public class MainFrame extends JFrame {
 	private void refreshTables() {
 		tablePanel.refresh();
 		itemSelectPanel.refresh();
+		cratePanel.refresh();
+		itemsInCratePanel.refresh();
 		// if tables are updated, then Marks probably need to be as well
 		updateMarks();
 	}
@@ -477,7 +494,7 @@ public class MainFrame extends JFrame {
 			addItemWindow.setSelected(true);
 			addItemWindow.addActionListener((e) -> {
 				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
-				itemFormPanel.setVisible(menuItem.isSelected());
+				entryFormPanel.setVisible(menuItem.isSelected());
 			});
 			showPaneMenu.add(addItemWindow);
 

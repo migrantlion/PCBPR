@@ -17,30 +17,29 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import com.plancrawler.model.utilities.ColorUtility;
-import com.plancrawler.view.support.ItemFormEvent;
-import com.plancrawler.view.support.ItemFormListener;
+import com.plancrawler.view.support.EntryFormEvent;
+import com.plancrawler.view.support.EntryFormListener;
 
-
-
-public class ItemFormPanel extends JPanel {
+public class EntryFormPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private ArrayList<ItemFormListener> listeners = new ArrayList<ItemFormListener>();
+	private ArrayList<EntryFormListener> listeners = new ArrayList<EntryFormListener>();
 
-	private JLabel nameLabel, descLabel, catLabel;
+	private JLabel nameLabel, descLabel, catLabel, colorLabel;
 	private JTextField nameField, descField;
 	private JComboBox<String> catComboBox;
 	private DefaultComboBoxModel<String> catModel = new DefaultComboBoxModel<String>();
 	private JButton colorButt;
-	private JButton addButt;
+	private JButton addItemButt, addCrateButt;
 	private Color nocolor;
 
-	public ItemFormPanel() {
+	public EntryFormPanel() {
 		setupPanel();
 		attachComponents();
 	}
@@ -50,7 +49,7 @@ public class ItemFormPanel extends JPanel {
 		dim.width = 250;
 		setPreferredSize(dim);
 
-		Border innerBorder = BorderFactory.createTitledBorder("Add Item");
+		Border innerBorder = BorderFactory.createTitledBorder("Add Entry");
 		Border outerBorder = BorderFactory.createEtchedBorder();
 		setBorder(BorderFactory.createCompoundBorder(outerBorder, innerBorder));
 		setLayout(new GridBagLayout());
@@ -62,6 +61,9 @@ public class ItemFormPanel extends JPanel {
 		catLabel = new JLabel("category:");
 		nameField = new JTextField(10);
 		descField = new JTextField(10);
+		colorLabel = new JLabel("color");
+		colorLabel.setOpaque(true);
+		setColorLabelColor(ColorUtility.randColor());
 
 		catModel.addElement("none");
 		catModel.addElement("toilet");
@@ -75,12 +77,18 @@ public class ItemFormPanel extends JPanel {
 		nocolor = colorButt.getBackground();
 		colorButt.addActionListener((e) -> {
 			Color color = JColorChooser.showDialog(colorButt, "Pick a Color", nocolor);
-			if (color != null)
-				setColorButtColor(color);
+			if (color != null) {
+				setColorLabelColor(color);
+			}
 		});
+		Dimension dim = colorButt.getPreferredSize();
+		colorLabel.setPreferredSize(dim);
 
-		addButt = new JButton("ADD");
-		addButt.addActionListener(new ItemFormButtListener());
+		addItemButt = new JButton("ADD Item");
+		addItemButt.addActionListener(new ItemFormButtListener());
+
+		addCrateButt = new JButton("ADD Crate");
+		addCrateButt.addActionListener(new ItemFormButtListener());
 
 		nameLabel.setLabelFor(nameField);
 		descLabel.setLabelFor(descField);
@@ -88,9 +96,9 @@ public class ItemFormPanel extends JPanel {
 
 		nameLabel.setDisplayedMnemonic(KeyEvent.VK_N);
 		descLabel.setDisplayedMnemonic(KeyEvent.VK_D);
-		catLabel.setDisplayedMnemonic(KeyEvent.VK_C);
 
-		addButt.setMnemonic(KeyEvent.VK_A);
+		addItemButt.setMnemonic(KeyEvent.VK_A);
+		addCrateButt.setMnemonic(KeyEvent.VK_C);
 		colorButt.setMnemonic(KeyEvent.VK_O);
 
 		layoutComponents();
@@ -139,61 +147,85 @@ public class ItemFormPanel extends JPanel {
 		gc.insets = noPad;
 		add(catComboBox, gc);
 
+		// next Row
+		gc.gridy++;
+		gc.gridx = 0;
+		gc.anchor = GridBagConstraints.NORTH;
+		gc.insets = rightPad;
+		add(colorLabel, gc);
+		gc.gridx = 1;
+		gc.anchor = GridBagConstraints.NORTHWEST;
+		gc.insets = noPad;
+		add(colorButt, gc);
+
+		// separator
+		gc.gridy++;
+		gc.gridx = 0;
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		gc.gridwidth = GridBagConstraints.REMAINDER;
+		add(new JSeparator(JSeparator.HORIZONTAL), gc);
+
 		// last Row
 		gc.gridy++;
 		gc.anchor = GridBagConstraints.NORTH;
+		gc.fill = GridBagConstraints.NONE;
+		gc.gridwidth = GridBagConstraints.RELATIVE;
 		gc.weighty = 10.0;
 		gc.gridx = 0;
-		add(colorButt, gc);
+		add(addCrateButt, gc);
 		gc.gridx = 1;
-		add(addButt, gc);
+		add(addItemButt, gc);
 	}
 
 	public void clearForm() {
 		nameField.setText("");
 		descField.setText("");
-		setColorButtColor(nocolor);
+		setColorLabelColor(ColorUtility.randColor());
 	}
 
-	private void setColorButtColor(Color color) {
-		colorButt.setBackground(color);
-		colorButt.setForeground(ColorUtility.invert(color));
+	private void setColorLabelColor(Color color) {
+		colorLabel.setBackground(color);
+		colorLabel.setForeground(color);
 	}
 
-	private void alertListeners(ItemFormEvent e) {
-		for (ItemFormListener i : listeners)
+	private void alertListeners(EntryFormEvent e) {
+		for (EntryFormListener i : listeners)
 			i.itemFormSubmitted(e);
 	}
 
-	public void addFormListener(ItemFormListener i) {
+	public void addFormListener(EntryFormListener i) {
 		listeners.add(i);
 	}
 
-	public boolean remFormListener(ItemFormListener i) {
+	public boolean remFormListener(EntryFormListener i) {
 		return listeners.remove(i);
 	}
 
 	private class ItemFormButtListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			if (e.getSource() == addButt) {
-				ItemFormEvent ie = new ItemFormEvent(ItemFormPanel.this);
-				ie.setItemName(nameField.getText());
-				ie.setItemDesc(descField.getText());
-				ie.setItemCat((String) catComboBox.getSelectedItem());
-				if (colorButt.getBackground() == nocolor)
-					ie.setItemColor(ColorUtility.randColor());
-				else
-					ie.setItemColor(colorButt.getBackground());
-				alertListeners(ie);
+			EntryFormEvent ie = new EntryFormEvent(EntryFormPanel.this);
+			ie.setEntryName(nameField.getText());
+			ie.setEntryDesc(descField.getText());
+			ie.setEntryCat((String) catComboBox.getSelectedItem());
+			if (colorLabel.getBackground() == nocolor)
+				ie.setEntryColor(ColorUtility.randColor());
+			else
+				ie.setEntryColor(colorLabel.getBackground());
 
-				String catSelected = (String) catComboBox.getSelectedItem();
-				if (!catSelected.equals((String) catModel.getElementAt(catComboBox.getSelectedIndex()))) {
-					catModel.addElement(catSelected);
-					catComboBox.setModel(catModel);
-				}
-				clearForm();
+			if (e.getSource() == addItemButt) {
+				ie.setAddItem(true);
+				alertListeners(ie);
+			} else if (e.getSource() == addCrateButt) {
+				ie.setAddCrate(true);
+				alertListeners(ie);
 			}
+
+			String catSelected = (String) catComboBox.getSelectedItem();
+			if (!catSelected.equals((String) catModel.getElementAt(catComboBox.getSelectedIndex()))) {
+				catModel.addElement(catSelected);
+				catComboBox.setModel(catModel);
+			}
+			clearForm();
 		}
 	}
-
 }

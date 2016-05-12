@@ -15,12 +15,12 @@ import javax.swing.JTextField;
 
 import com.plancrawler.model.Item;
 import com.plancrawler.model.utilities.ColorUtility;
-import com.plancrawler.view.support.ItemFormEvent;
+import com.plancrawler.view.support.EntryFormEvent;
 
 public class ItemModifyDialog {
 
-	public static ItemFormEvent modifyItem(Item item, JComponent parent) {
-		ItemFormEvent ife;
+	public static EntryFormEvent modifyItem(Item item, JComponent parent) {
+		EntryFormEvent ife;
 
 		// setup labels
 		JLabel headerLabel = new JLabel("Modify properties of Item Entry");
@@ -102,10 +102,10 @@ public class ItemModifyDialog {
 
 		// populate event and pass back
 		if (result == JOptionPane.OK_OPTION)
-			ife = new ItemFormEvent(result, newNameField.getText(), newDescField.getText(), newCatField.getText(),
+			ife = new EntryFormEvent(result, newNameField.getText(), newDescField.getText(), newCatField.getText(),
 					colorButt.getBackground());
 		else
-			ife = new ItemFormEvent(result, item.getName(), item.getDescription(), item.getCategory(), item.getColor());
+			ife = new EntryFormEvent(result, item.getName(), item.getDescription(), item.getCategory(), item.getColor());
 
 		return ife;
 	}
