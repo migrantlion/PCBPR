@@ -6,16 +6,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Crate implements Serializable, Comparable<Crate> {
+public class Crate extends Entry implements Serializable, Comparable<Crate> {
 	private static final long serialVersionUID = 1L;
 
 	private List<Item> items = new ArrayList<Item>();
 	private List<Tokens> crateTokens = new ArrayList<Tokens>();
 
-	private String name;
-	private String description;
-	private String category;
-	private Color color;
+//	private String name;
+//	private String description;
+//	private String category;
+//	private Color color;
 
 	public Crate(String name, String description, String category, Color color) {
 		this.name = name;

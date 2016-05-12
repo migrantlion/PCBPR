@@ -75,4 +75,11 @@ public class CrateDatabase implements Serializable {
 		else
 			return getItemsInCrate(crates.get(crateIndex));
 	}
+	
+	public Crate getCrate(int index){
+		if (index < 0 || index > crates.size())
+			return null;
+		else
+			return crates.get(index);
+	}
 }

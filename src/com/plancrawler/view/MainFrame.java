@@ -35,7 +35,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.plancrawler.controller.Controller;
 import com.plancrawler.controller.Paintable;
 import com.plancrawler.model.utilities.MyPoint;
-import com.plancrawler.view.dialogs.ItemModifyDialog;
+import com.plancrawler.view.dialogs.EntryModifyDialog;
 import com.plancrawler.view.support.EntryFormEvent;
 import com.plancrawler.view.toolbars.FocusToolbar;
 import com.plancrawler.view.toolbars.MeasureToolbar;
@@ -61,6 +61,7 @@ public class MainFrame extends JFrame {
 	private TablePanel itemsInCratePanel = new TablePanel();
 	private PDFViewPane pdfViewPanel = new PDFViewPane();
 	private ItemSelectionPanel itemSelectPanel = new ItemSelectionPanel();
+	private CrateSelectionPanel crateSelectPanel = new CrateSelectionPanel();
 
 	private Controller controller = new Controller();
 
@@ -216,12 +217,26 @@ public class MainFrame extends JFrame {
 				controller.deleteItemRow(e.getRow());
 				refreshTables();
 			} else if (e.isModifyRequest()) {
-				EntryFormEvent ife = ItemModifyDialog.modifyItem(controller.getItem(e.getRow()), itemSelectPanel);
+				EntryFormEvent ife = EntryModifyDialog.modifyItem(controller.getItem(e.getRow()), itemSelectPanel);
 				controller.modifyItem(e.getRow(), ife);
 				refreshTables();
 			}
 		});
 		westPanel.add(itemSelectPanel);
+		
+		crateSelectPanel.setData(controller.getCrates());
+		crateSelectPanel.addItemSelectionListener((e) -> {
+			controller.setActiveCrateRow(e.getRow());
+			if (e.isDeleteRequest()) {
+				controller.deleteCrateRow(e.getRow());
+				refreshTables();
+			} else if (e.isModifyRequest()) {
+				EntryFormEvent ife = EntryModifyDialog.modifyItem(controller.getCrate(e.getRow()), crateSelectPanel);
+				controller.modifyCrate(e.getRow(), ife);
+				refreshTables();
+			}
+		});
+		westPanel.add(crateSelectPanel);
 
 		this.add(westPanel, BorderLayout.WEST);
 
@@ -230,6 +245,7 @@ public class MainFrame extends JFrame {
 	private void refreshTables() {
 		tablePanel.refresh();
 		itemSelectPanel.refresh();
+		crateSelectPanel.refresh();
 		cratePanel.refresh();
 		itemsInCratePanel.refresh();
 		// if tables are updated, then Marks probably need to be as well

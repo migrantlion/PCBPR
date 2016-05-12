@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class Item implements Serializable, Comparable<Item> {
+public class Item extends Entry implements Serializable, Comparable<Item> {
 
 	private static final long serialVersionUID = 1L;
 	private static int counter = 0;
 	private int id;
-	private String name;
-	private String description;
-	private String category;
-	private Color color;
+//	private String name;
+//	private String description;
+//	private String category;
+//	private Color color;
 
 	private CopyOnWriteArrayList<Tokens> tokens = new CopyOnWriteArrayList<Tokens>();
 

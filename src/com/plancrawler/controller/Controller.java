@@ -25,7 +25,8 @@ public class Controller {
 	private DocumentHandler pdfDoc;
 	private int activeItemRow = -1;
 	private boolean isMeasuring = false;
-	
+	private int activeCrateRow = -1;
+
 	public Controller() {
 		this.db = Database.getInstance();
 		this.pdfDoc = new DocumentHandler();
@@ -56,8 +57,8 @@ public class Controller {
 		Item item = new Item(name, desc, cat, color);
 		db.addItem(item);
 	}
-	
-	public boolean hasItemByName(String name){
+
+	public boolean hasItemByName(String name) {
 		List<Item> items = db.getItems();
 		boolean answer = false;
 		for (Item i : items)
@@ -95,14 +96,14 @@ public class Controller {
 			tokens.clear();
 		}
 		paintable.addAll(tokenPainter);
-		
+
 		// add measurement marks
 		List<Measurement> measurements = db.getMeasurements();
-		for (Measurement m : measurements){
+		for (Measurement m : measurements) {
 			if (m.getPage() == getCurrentPage())
 				paintable.add(new MeasurePainter(m));
 		}
-		
+
 		return paintable;
 	}
 
@@ -154,7 +155,7 @@ public class Controller {
 		if (hasActiveItem()) {
 			Location loc = new Location(getCurrentPage(), point, ItemLocations.ON_PAGE);
 			db.remTokenFromItem(loc, activeItemRow);
-		}	
+		}
 	}
 
 	public void clearTables() {
@@ -164,7 +165,7 @@ public class Controller {
 	public String getAssociatedPDFName() {
 		return db.getAssociatedPDFName();
 	}
-	
+
 	public void addMeasurement(Measurement meas) {
 		db.addMeasurement(new Measurement(meas.getStartPt(), meas.getEndPt(), getCurrentPage(), meas.getScale()));
 	}
@@ -172,12 +173,12 @@ public class Controller {
 	public void removeMeasurement(MyPoint point) {
 		db.remMeasurement(point, getCurrentPage());
 	}
-	
-	public void setMeasuring(boolean state){
+
+	public void setMeasuring(boolean state) {
 		isMeasuring = state;
 	}
-	
-	public boolean isMeasuring(){
+
+	public boolean isMeasuring() {
 		return isMeasuring;
 	}
 
@@ -187,7 +188,7 @@ public class Controller {
 
 	public void modifyItem(int row, EntryFormEvent ife) {
 		Item item = new Item(ife.getEntryName(), ife.getEntryDesc(), ife.getEntryCat(), ife.getEntryColor());
-		db.modifyEntry(row, item);	
+		db.modifyEntry(row, item);
 	}
 
 	public List<Crate> getCrates() {
@@ -215,6 +216,31 @@ public class Controller {
 
 		Crate crate = new Crate(name, desc, cat, color);
 		db.addCrate(crate);
-		
+
+	}
+
+	public void setActiveCrateRow(int row) {
+		this.activeCrateRow = row;
+	}
+
+	public int getActiveCrateRow() {
+		return activeCrateRow;
+	}
+
+	public boolean hasActiveCrate() {
+		return (activeCrateRow >= 0);
+	}
+
+	public void modifyCrate(int row, EntryFormEvent ife) {
+		Crate crate = new Crate(ife.getEntryName(), ife.getEntryDesc(), ife.getEntryCat(), ife.getEntryColor());
+		db.modifyCrateEntry(row, crate);
+	}
+
+	public Crate getCrate(int row) {
+		return db.getCrate(row);
+	}
+
+	public boolean deleteCrateRow(int row) {
+		return db.remCrate(row);
 	}
 }

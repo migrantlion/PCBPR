@@ -172,5 +172,25 @@ public class Database {
 		warehouse.addCrate(crate);
 	}
 	
+	public Crate getCrate(int index){
+		return warehouse.getCrate(index);
+	}
+
+	public void modifyCrateEntry(int index, Crate crate) {
+		Crate entry = getCrate(index);
+		if (entry == null)
+			addCrate(entry);
+		else {
+			entry.setName(crate.getName());
+			entry.setDescription(crate.getDescription());
+			entry.setCategory(crate.getCategory());
+			entry.setColor(crate.getColor());
+		}
+	}
+
+	public boolean remCrate(int row) {
+		return warehouse.remCrate(getCrate(row));
+	}
+	
 }
 

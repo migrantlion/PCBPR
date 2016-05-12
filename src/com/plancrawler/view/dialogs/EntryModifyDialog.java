@@ -13,13 +13,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.plancrawler.model.Item;
+import com.plancrawler.model.Entry;
 import com.plancrawler.model.utilities.ColorUtility;
 import com.plancrawler.view.support.EntryFormEvent;
 
-public class ItemModifyDialog {
+public class EntryModifyDialog {
 
-	public static EntryFormEvent modifyItem(Item item, JComponent parent) {
+	public static EntryFormEvent modifyItem(Entry item, JComponent parent) {
 		EntryFormEvent ife;
 
 		// setup labels
