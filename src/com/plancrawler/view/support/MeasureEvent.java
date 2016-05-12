@@ -2,39 +2,36 @@ package com.plancrawler.view.support;
 
 import java.util.EventObject;
 
+import com.plancrawler.controller.MeasurePainter;
+
 public class MeasureEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
-	private boolean measureRequest = false;
-	private boolean calibrationRequest = false;
-	private int calibrationIndex;
+	private MeasurePainter meas;
+	private boolean drawRequest = false;
+	private boolean addMeasurementRequest = false;
+	private boolean measurementActive = false;
 	
-	public MeasureEvent(Object arg0) {
-		super(arg0);
+	public MeasureEvent(Object obj, MeasurePainter meas, boolean measurementActive, boolean drawRequest, boolean addMeasurementRequest) {
+		super(obj);
+		this.meas = meas;
+		this.drawRequest = drawRequest;
+		this.addMeasurementRequest = addMeasurementRequest;
 	}
 
-	public boolean isMeasureRequest() {
-		return measureRequest;
+	public MeasurePainter getMeas() {
+		return meas;
 	}
 
-	public void setMeasureRequest(boolean measureRequest) {
-		this.measureRequest = measureRequest;
+	public boolean isDrawRequest() {
+		return drawRequest;
 	}
 
-	public boolean isCalibrationRequest() {
-		return calibrationRequest;
+	public boolean isAddMeasurementRequest() {
+		return addMeasurementRequest;
 	}
 
-	public void setCalibrationRequest(boolean calibrationRequest) {
-		this.calibrationRequest = calibrationRequest;
+	public boolean isMeasurementActive(){
+		return measurementActive;
 	}
-
-	public int getCalibrationIndex() {
-		return calibrationIndex;
-	}
-
-	public void setCalibrationIndex(int calibrationIndex) {
-		this.calibrationIndex = calibrationIndex;
-	}
-
 }

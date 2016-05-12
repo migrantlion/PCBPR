@@ -41,7 +41,7 @@ public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	// Tool-bars
+	// Toolbars
 	private SaveLoadToolbar fileToolbar;
 	private NavToolbar navToolbar;
 	private RotateToolbar rotToolbar;
@@ -49,10 +49,10 @@ public class MainFrame extends JFrame {
 	private MeasureToolbar measToolbar;
 
 	// Panes
-	private ItemFormPanel itemFormPanel;
-	private TablePanel tablePanel;
-	private PDFViewPane pdfViewPanel;
-	private ItemSelectionPanel itemSelectPanel;
+	private ItemFormPanel itemFormPanel = new ItemFormPanel();
+	private TablePanel tablePanel = new TablePanel();
+	private PDFViewPane pdfViewPanel = new PDFViewPane();
+	private ItemSelectionPanel itemSelectPanel = new ItemSelectionPanel();
 
 	private Controller controller = new Controller();
 
@@ -121,13 +121,13 @@ public class MainFrame extends JFrame {
 		});
 		toolPanel.add(focusToolbar);
 
-		measToolbar = new MeasureToolbar();
+		measToolbar = new MeasureToolbar(pdfViewPanel);
 		measToolbar.addMeasurementListener((m) -> {
-			if (m.isMeasureRequest())
-				controller.setMeasuring(true);
-			else if (m.isCalibrationRequest()) {
-				controller.setCalibration(m.getCalibrationIndex());
-			}
+			controller.setMeasuring(m.isMeasurementActive());
+			if (m.isAddMeasurementRequest())
+				controller.addMeasurement(m.getMeas());
+			if (m.isDrawRequest())
+				requestDraw(m.getMeas());
 		});
 		toolPanel.add(measToolbar);
 
@@ -145,18 +145,12 @@ public class MainFrame extends JFrame {
 
 	private void addCenterComponents() {
 		MouseHandler handler = new MouseHandler();
-		MeasureMouseListener measListener = new MeasureMouseListener();
 		JTabbedPane centerTabPane = new JTabbedPane();
 
-		pdfViewPanel = new PDFViewPane();
 		pdfViewPanel.addMouseListener(handler);
 		pdfViewPanel.addMouseWheelListener(handler);
 		pdfViewPanel.addMouseMotionListener(handler);
 
-		pdfViewPanel.addMouseListener(measListener);
-		pdfViewPanel.addMouseMotionListener(measListener);
-
-		tablePanel = new TablePanel();
 		tablePanel.setData(controller.getItems());
 
 		centerTabPane.addTab("PDF View", pdfViewPanel);
@@ -169,7 +163,6 @@ public class MainFrame extends JFrame {
 		JPanel westPanel = new JPanel();
 		westPanel.setLayout(new GridLayout(0, 1));
 
-		itemFormPanel = new ItemFormPanel();
 		itemFormPanel.addFormListener((e) -> {
 			int action = JOptionPane.OK_OPTION;
 			if (controller.hasItemByName(e.getItemName())) {
@@ -185,7 +178,6 @@ public class MainFrame extends JFrame {
 		});
 		westPanel.add(itemFormPanel);
 
-		itemSelectPanel = new ItemSelectionPanel();
 		itemSelectPanel.setData(controller.getItems());
 		itemSelectPanel.addItemSelectionListener((e) -> {
 			controller.setActiveItemRow(e.getRow());
@@ -493,42 +485,6 @@ public class MainFrame extends JFrame {
 			JMenuItem aboutMenuItem = new JMenuItem("About");
 			aboutMenu.add(aboutMenuItem);
 			this.add(aboutMenu);
-		}
-	}
-
-	class MeasureMouseListener extends MouseAdapter {
-		MyPoint pt1 = null;
-		MyPoint currPt;
-		MeasurePainter mp = null;
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			if (controller.isMeasuring()) {
-				if (pt1 == null) {
-					pt1 = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
-					mp = new MeasurePainter(pt1, pt1, controller.getCurrentPage(), controller.getActiveScale());
-					requestDraw(mp);
-				} else {
-					MyPoint pt2 = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
-					mp.setEndPt(pt2);
-					pt1 = null;
-
-					controller.doMeasurement(mp);
-					measToolbar.resetButtons();
-					updateMarks();
-				}
-			}
-		}
-
-		@Override
-		public void mouseMoved(MouseEvent e) {
-			if (controller.isMeasuring()) {
-				currPt = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
-				if (pt1 != null) {
-					mp.setEndPt(currPt);
-					requestDraw(mp);
-				}
-			}
 		}
 	}
 
