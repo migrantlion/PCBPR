@@ -11,9 +11,9 @@ public class Location implements Serializable {
 	private MyPoint point;
 	private ItemLocations whereAt;
 
-	public Location(int page, MyPoint loc, ItemLocations whereAt) {
+	public Location(int page, MyPoint point, ItemLocations whereAt) {
 		this.page = page;
-		this.point = loc;
+		this.point = new MyPoint(point);
 		this.whereAt = whereAt;
 	}
 
@@ -33,8 +33,8 @@ public class Location implements Serializable {
 		return new MyPoint(point);
 	}
 
-	public void setPoint(MyPoint loc) {
-		this.point = loc;
+	public void setPoint(MyPoint point) {
+		this.point = new MyPoint(point);
 	}
 
 	public ItemLocations getWhereAt() {

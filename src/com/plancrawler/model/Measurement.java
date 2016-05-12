@@ -12,13 +12,22 @@ public class Measurement implements Serializable {
 	private double scale = 1.0;
 	
 	public Measurement(MyPoint startPt, MyPoint endPt, int page){
-		this.startPt = startPt;
-		this.endPt = endPt;
+		this.startPt = new MyPoint(startPt);
+		this.endPt = new MyPoint(endPt);
 		this.page = page;
 	}
 	
-	public void calibrate(int DPI, double pageInch, double realFoot) {
-		scale = (realFoot / ((double) DPI * pageInch));
+	public Measurement(MyPoint pt1, MyPoint pt2, int currentPage, double calibrationScale) {
+		this(pt1, pt2, currentPage);
+		this.scale = calibrationScale;
+	}
+
+	public void calibrate(double pageInch, double realFoot) {
+		scale = (realFoot / ((double) DocumentHandler.DPI * pageInch));
+	}
+	
+	public static double getCalibration(double pageInch, double realFoot) {
+		return (realFoot / ((double) DocumentHandler.DPI * pageInch));
 	}
 	
 	public boolean isVerticalOrientation() {
@@ -58,7 +67,7 @@ public class Measurement implements Serializable {
 		return toFeetInches(MyPoint.dist(startPt, endPt) * scale);
 	}
 
-	private String toFeetInches(double meas) {
+	public static String toFeetInches(double meas) {
 		int feet, inch;
 
 		feet = (int) (Math.floor(meas));
@@ -90,7 +99,7 @@ public class Measurement implements Serializable {
 		return answer;
 	}
 
-	private int[] simplify(double fraction) {
+	private static int[] simplify(double fraction) {
 		int[] frac = new int[2];
 
 		long a = Math.round(fraction * 8);
@@ -116,19 +125,19 @@ public class Measurement implements Serializable {
 	}
 
 	public MyPoint getStartPt() {
-		return startPt;
+		return new MyPoint(startPt);
 	}
 
 	public void setStartPt(MyPoint startPt) {
-		this.startPt = startPt;
+		this.startPt = new MyPoint(startPt);
 	}
 
 	public MyPoint getEndPt() {
-		return endPt;
+		return new MyPoint(endPt);
 	}
 
 	public void setEndPt(MyPoint endPt) {
-		this.endPt = endPt;
+		this.endPt = new MyPoint(endPt);
 	}
 
 	public double getScale() {

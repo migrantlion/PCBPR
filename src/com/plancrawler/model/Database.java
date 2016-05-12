@@ -6,10 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.plancrawler.model.utilities.MyPoint;
 
 public class Database {
 	private static Database uniqueInstance = new Database();
@@ -128,6 +131,17 @@ public class Database {
 
 	public void setAssociatedPDFName(String associatedPDFName) {
 		this.associatedPDFName = associatedPDFName;
+	}
+
+	public void remMeasurement(MyPoint point, int currentPage) {
+		List<Measurement> remList = new ArrayList<Measurement>();
+		
+		for (Measurement m : measurements){
+			if (m.isAtLocation(point, currentPage))
+				remList.add(m);
+		}
+		for (Measurement m : remList)
+			measurements.remove(m);
 	}
 	
 }

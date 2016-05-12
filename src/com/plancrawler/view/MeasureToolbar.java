@@ -1,5 +1,6 @@
 package com.plancrawler.view;
 
+import java.awt.Color;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,8 @@ public class MeasureToolbar extends JToolBar {
 	private JButton calibButt;
 	private JComboBox<String> scaleComboBox;
 	private DefaultComboBoxModel<String> scaleModel = new DefaultComboBoxModel<String>();
+	private Color noColor;
+	private Color selectedColor = Color.cyan;
 	
 	public MeasureToolbar(){
 		setupButtons();
@@ -35,19 +38,24 @@ public class MeasureToolbar extends JToolBar {
 		measButt.setToolTipText("measure");
 		measButt.setIcon(createIcon("/com/plancrawler/view/iconImages/Meas16.gif"));
 		measButt.addActionListener((e)->{
+			measButt.setBackground(selectedColor);
 			MeasureEvent me = new MeasureEvent(measButt);
 			me.setMeasureRequest(true);
 			alertListeners(me);
 		});
+		// assign background color
+		noColor = measButt.getBackground();
 		
 		calibButt = new JButton();
 		calibButt.setToolTipText("calibrate from measurement");
 		calibButt.setIcon(createIcon("/com/plancrawler/view/iconImages/Calibrate16.gif"));
 		calibButt.addActionListener((e)->{
+			calibButt.setBackground(selectedColor);
 			MeasureEvent me = new MeasureEvent(calibButt);
 			me.setCalibrationRequest(true);
 			me.setCalibrationIndex(5);
 			scaleComboBox.setSelectedIndex(5);
+			alertListeners(me);
 		});
 	}
 	
@@ -69,7 +77,13 @@ public class MeasureToolbar extends JToolBar {
 			MeasureEvent me = new MeasureEvent(scaleComboBox);
 			me.setCalibrationRequest(true);
 			me.setCalibrationIndex(scaleComboBox.getSelectedIndex());
+			alertListeners(me);
 		});
+	}
+	
+	public void resetButtons(){
+		measButt.setBackground(noColor);
+		calibButt.setBackground(noColor);
 	}
 	
 	public void addComponents(){

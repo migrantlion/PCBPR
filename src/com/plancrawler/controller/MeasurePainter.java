@@ -17,7 +17,11 @@ public class MeasurePainter extends Measurement implements Paintable {
 	Color drawColor = Color.magenta;
 
 	public MeasurePainter(Measurement meas){
-		super(meas.getStartPt(), meas.getEndPt(), meas.getPage());
+		super(meas.getStartPt(), meas.getEndPt(), meas.getPage(), meas.getScale());
+	}
+	
+	public MeasurePainter(MyPoint startPt, MyPoint endPt, int page, double scale){
+		super(startPt, endPt, page, scale);
 	}
 	
 	@Override

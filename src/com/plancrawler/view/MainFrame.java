@@ -7,11 +7,13 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
@@ -31,7 +33,9 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.plancrawler.controller.Controller;
+import com.plancrawler.controller.MeasurePainter;
 import com.plancrawler.model.utilities.MyPoint;
+import com.plancrawler.view.support.Paintable;
 
 public class MainFrame extends JFrame {
 
@@ -90,7 +94,7 @@ public class MainFrame extends JFrame {
 				saveTO();
 		});
 		toolPanel.add(fileToolbar);
-		
+
 		rotToolbar = new RotateToolbar();
 		rotToolbar.addRotToolbarListener((e) -> {
 			controller.handlePageRotation(e);
@@ -118,11 +122,15 @@ public class MainFrame extends JFrame {
 		toolPanel.add(focusToolbar);
 
 		measToolbar = new MeasureToolbar();
-		measToolbar.addMeasurementListener((m)->{
-			//TODO: add measurement handling
+		measToolbar.addMeasurementListener((m) -> {
+			if (m.isMeasureRequest())
+				controller.setMeasuring(true);
+			else if (m.isCalibrationRequest()) {
+				controller.setCalibration(m.getCalibrationIndex());
+			}
 		});
 		toolPanel.add(measToolbar);
-		
+
 		setToolbarFloat(false); // initially set all to locked
 		this.add(toolPanel, BorderLayout.PAGE_START);
 	}
@@ -137,12 +145,16 @@ public class MainFrame extends JFrame {
 
 	private void addCenterComponents() {
 		MouseHandler handler = new MouseHandler();
+		MeasureMouseListener measListener = new MeasureMouseListener();
 		JTabbedPane centerTabPane = new JTabbedPane();
 
 		pdfViewPanel = new PDFViewPane();
 		pdfViewPanel.addMouseListener(handler);
 		pdfViewPanel.addMouseWheelListener(handler);
 		pdfViewPanel.addMouseMotionListener(handler);
+
+		pdfViewPanel.addMouseListener(measListener);
+		pdfViewPanel.addMouseMotionListener(measListener);
 
 		tablePanel = new TablePanel();
 		tablePanel.setData(controller.getItems());
@@ -200,6 +212,13 @@ public class MainFrame extends JFrame {
 
 	private void updateMarks() {
 		pdfViewPanel.setDisplayMarks(controller.getPaintables(controller.getCurrentPage()));
+		repaint();
+	}
+
+	private void requestDraw(Paintable paintable) {
+		List<Paintable> paintables = controller.getPaintables(controller.getCurrentPage());
+		paintables.add(paintable);
+		pdfViewPanel.setDisplayMarks(paintables);
 		repaint();
 	}
 
@@ -432,7 +451,7 @@ public class MainFrame extends JFrame {
 				rotToolbar.setVisible(menuItem.isSelected());
 			});
 			showToolbarMenu.add(rotBarWindow);
-			
+
 			JCheckBoxMenuItem measBarWindow = new JCheckBoxMenuItem("Measurement Bar");
 			measBarWindow.setSelected(true);
 			measBarWindow.addActionListener((e) -> {
@@ -477,13 +496,47 @@ public class MainFrame extends JFrame {
 		}
 	}
 
+	class MeasureMouseListener extends MouseAdapter {
+		MyPoint pt1 = null;
+		MyPoint currPt;
+		MeasurePainter mp = null;
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (controller.isMeasuring()) {
+				if (pt1 == null) {
+					pt1 = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
+					mp = new MeasurePainter(pt1, pt1, controller.getCurrentPage(), controller.getActiveScale());
+					requestDraw(mp);
+				} else {
+					MyPoint pt2 = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
+					mp.setEndPt(pt2);
+					pt1 = null;
+
+					controller.doMeasurement(mp);
+					measToolbar.resetButtons();
+					updateMarks();
+				}
+			}
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			if (controller.isMeasuring()) {
+				currPt = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
+				if (pt1 != null) {
+					mp.setEndPt(currPt);
+					requestDraw(mp);
+				}
+			}
+		}
+	}
+
 	private class MouseHandler implements MouseWheelListener, MouseInputListener, MouseMotionListener {
 		private int mouseX, mouseY;
 		private boolean needsFocus = false;
-		private boolean isAlreadyOneClick = false;
 		private boolean button1Pressed = false;
 		private boolean button3Pressed = false;;
-		MyPoint pt1;
 
 		@Override
 		public void mouseWheelMoved(MouseWheelEvent e) {
@@ -494,7 +547,7 @@ public class MainFrame extends JFrame {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			if (e.getSource() == pdfViewPanel) {
+			if (e.getSource() == pdfViewPanel && !controller.isMeasuring()) {
 				MyPoint point = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
 				if (e.getButton() == MouseEvent.BUTTON1) {
 					if (controller.hasActiveItem()) {
@@ -505,51 +558,13 @@ public class MainFrame extends JFrame {
 					if (controller.hasActiveItem()) {
 						controller.removeToken(point);
 						updateMarks();
+					} else {
+						controller.removeMeasurement(point);
+						updateMarks();
 					}
 				}
 			}
 		}
-		// if (!measRibbon.isMeasuring()) {
-		// pt1 = null;
-		// if (e.getSource().equals(pdfViewPanel) && hasActiveItem()) {
-		// if (isAlreadyOneClick) {
-		// System.out.println("double click");
-		// if (e.getButton() == 3)
-		// changeItemInfo();
-		// isAlreadyOneClick = false;
-		// } else {
-		// isAlreadyOneClick = true;
-		// Timer t = new Timer("doubleclickTimer", false);
-		// t.schedule(new TimerTask() {
-		// @Override
-		// public void run() {
-		// // if oneClick is on, then it must have been a
-		// // single click
-		// if (isAlreadyOneClick) {
-		// if (e.getButton() == 1)
-		// addToTakeOff(new MyPoint(e.getX(), e.getY()));
-		// else if (e.getButton() == 3)
-		// removeFromTakeOff(new MyPoint(e.getX(), e.getY()));
-		// }
-		// isAlreadyOneClick = false;
-		// }
-		// }, 500);
-		// }
-		// } else if (e.getSource().equals(centerScreen) && e.getButton() == 3)
-		// removeFromTakeOff(new MyPoint(e.getX(), e.getY()));
-		// } else { // measuring
-		// if (pt1 == null) {
-		// MyPoint screenPt = new MyPoint(e.getX(), e.getY());
-		// pt1 = centerScreen.getImageRelativePoint(screenPt);
-		// measRibbon.setFirst(pt1);
-		// } else {
-		// MyPoint screenPt = new MyPoint(e.getX(), e.getY());
-		// MyPoint pt2 = centerScreen.getImageRelativePoint(screenPt);
-		// measRibbon.doMeasurement(pt1, pt2);
-		// pt1 = null;
-		// }
-		// }
-		// }
 
 		@Override
 		public void mouseEntered(MouseEvent arg0) {
@@ -583,7 +598,7 @@ public class MainFrame extends JFrame {
 			mouseX = e.getX();
 			mouseY = e.getY();
 
-			if (button1Pressed) {
+			if (button1Pressed && !controller.isMeasuring()) {
 				pdfViewPanel.move(dX, dY);
 				pdfViewPanel.repaint();
 			}
