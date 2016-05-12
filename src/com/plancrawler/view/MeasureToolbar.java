@@ -13,6 +13,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
 import com.plancrawler.controller.CalibrationDialog;
@@ -28,6 +29,7 @@ public class MeasureToolbar extends JToolBar {
 	private List<MeasListener> listeners = new ArrayList<MeasListener>();
 	private JButton measButt;
 	private JButton calibButt;
+	private JToggleButton gridButt;
 	private JComboBox<String> scaleComboBox;
 	private DefaultComboBoxModel<String> scaleModel = new DefaultComboBoxModel<String>();
 
@@ -55,8 +57,11 @@ public class MeasureToolbar extends JToolBar {
 		measButt.setToolTipText("measure");
 		measButt.setIcon(createIcon("/com/plancrawler/view/iconImages/Meas16.gif"));
 		measButt.addActionListener((e) -> {
-			measButt.setBackground(selectedColor);
-			isMeasuring = true;
+			if (measButt.getBackground() == noColor) {
+				measButt.setBackground(selectedColor);
+				isMeasuring = true;
+			} else
+				resetButtons();
 		});
 		// assign background color
 		noColor = measButt.getBackground();
@@ -65,9 +70,25 @@ public class MeasureToolbar extends JToolBar {
 		calibButt.setToolTipText("calibrate from measurement");
 		calibButt.setIcon(createIcon("/com/plancrawler/view/iconImages/Calibrate16.gif"));
 		calibButt.addActionListener((e) -> {
-			calibButt.setBackground(selectedColor);
-			setCalibration(5);
-			scaleComboBox.setSelectedIndex(5);
+			if (calibButt.getBackground() == noColor) {
+				calibButt.setBackground(selectedColor);
+				setCalibration(5);
+				scaleComboBox.setSelectedIndex(5);
+			} else {
+				setCalibration(0);
+				scaleComboBox.setSelectedIndex(0);
+				resetButtons();
+			}
+		});
+
+		gridButt = new JToggleButton();
+		gridButt.setToolTipText("force horiz/vert meas lines");
+		gridButt.setIcon(createIcon("/com/plancrawler/view/iconImages/Grid16.gif"));
+		gridButt.addActionListener((e) -> {
+			if (gridButt.isSelected())
+				gridButt.setBackground(selectedColor);
+			else
+				gridButt.setBackground(noColor);
 		});
 	}
 
@@ -103,6 +124,7 @@ public class MeasureToolbar extends JToolBar {
 		this.add(scaleComboBox);
 		this.add(measButt);
 		this.add(calibButt);
+		this.add(gridButt);
 	}
 
 	private Icon createIcon(String string) {
@@ -169,12 +191,14 @@ public class MeasureToolbar extends JToolBar {
 					alertListeners(measEvent);
 				} else {
 					MyPoint pt2 = hostPane.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
+					pt2 = gridPoint(mp.getStartPt(), pt2);
 					mp.setEndPt(pt2);
 					pt1 = null;
 					if (isCalibrating) {
 						double dist = MyPoint.dist(mp.getStartPt(), mp.getEndPt());
 						activeScale = CalibrationDialog.calibrate(hostPane, dist, mp.getMeasureString());
 					} else {
+						isMeasuring = false;
 						measEvent = new MeasureEvent(MeasureToolbar.this, mp, isMeasuring, false, true);
 						alertListeners(measEvent);
 					}
@@ -188,11 +212,27 @@ public class MeasureToolbar extends JToolBar {
 			if (isMeasuring) {
 				currPt = hostPane.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
 				if (pt1 != null) {
+					currPt = gridPoint(mp.getStartPt(), currPt);
 					mp.setEndPt(currPt);
 					measEvent = new MeasureEvent(MeasureToolbar.this, mp, isMeasuring, true, false);
 					alertListeners(measEvent);
 				}
 			}
+		}
+		
+		private MyPoint gridPoint(MyPoint ref, MyPoint p){
+			MyPoint point = p;
+			if (gridButt.isSelected()) {
+				double horizDist = (MyPoint.dist(ref,
+						new MyPoint(p.getX(), ref.getY())));
+				double vertDist = (MyPoint.dist(ref,
+						new MyPoint(ref.getX(), p.getY())));
+				if (horizDist >= vertDist)
+					point = new MyPoint(p.getX(), ref.getY());
+				else
+					point = new MyPoint(ref.getX(), p.getY());
+			}
+			return point;
 		}
 	}
 }
