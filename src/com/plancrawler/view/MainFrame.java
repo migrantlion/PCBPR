@@ -56,9 +56,9 @@ public class MainFrame extends JFrame {
 
 	// Panes
 	private EntryFormPanel entryFormPanel = new EntryFormPanel();
-	private TablePanel tablePanel = new TablePanel();
+	private TablePanel tablePanel = new TablePanel("Take Off: all items");
 	private CrateTablePane cratePanel = new CrateTablePane();
-	private TablePanel itemsInCratePanel = new TablePanel();
+	private TablePanel itemsInCratePanel = new TablePanel("Items In Crate");
 	private PDFViewPane pdfViewPanel = new PDFViewPane();
 	private ItemSelectionPanel itemSelectPanel = new ItemSelectionPanel();
 	private CrateSelectionPanel crateSelectPanel = new CrateSelectionPanel();
@@ -163,9 +163,14 @@ public class MainFrame extends JFrame {
 		tablePanel.setData(controller.getItems());
 
 		cratePanel.setData(controller.getCrates());
+		cratePanel.addTableListener((t)->{
+			controller.setCratePanelActive(t.getRow());
+			itemsInCratePanel.setTitle("Items in Crate:  "+controller.getCrateName(controller.getCratePanelActive()));
+			itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
+			itemsInCratePanel.refresh();
+		});
+		
 		itemsInCratePanel.setData(controller.getItemsInCrate(-1));
-		// TODO: add listeners to link up changes between cratePanel and
-		// itemsInCratePanel
 
 		JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, cratePanel, itemsInCratePanel);
 		splitPanel.setDividerLocation(0.5);
@@ -183,7 +188,8 @@ public class MainFrame extends JFrame {
 		westPanel.setLayout(new GridLayout(0, 1));
 
 		entryFormPanel.addFormListener((e) -> {
-			int action = JOptionPane.OK_OPTION;;
+			int action = JOptionPane.OK_OPTION;
+			;
 			if (e.isAddItem()) {
 				if (controller.hasItemByName(e.getEntryName())) {
 					action = JOptionPane.showConfirmDialog(MainFrame.this,
@@ -223,7 +229,7 @@ public class MainFrame extends JFrame {
 			}
 		});
 		westPanel.add(itemSelectPanel);
-		
+
 		crateSelectPanel.setData(controller.getCrates());
 		crateSelectPanel.addItemSelectionListener((e) -> {
 			controller.setActiveCrateRow(e.getRow());
@@ -247,6 +253,8 @@ public class MainFrame extends JFrame {
 		itemSelectPanel.refresh();
 		crateSelectPanel.refresh();
 		cratePanel.refresh();
+		itemsInCratePanel.setTitle("Items in Crate:  "+controller.getCrateName(controller.getCratePanelActive()));
+		itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
 		itemsInCratePanel.refresh();
 		// if tables are updated, then Marks probably need to be as well
 		updateMarks();
@@ -542,7 +550,7 @@ public class MainFrame extends JFrame {
 		private int mouseX, mouseY;
 		private boolean needsFocus = false;
 		private boolean button1Pressed = false;
-		private boolean button3Pressed = false;;
+//		private boolean button3Pressed = false;;
 
 		@Override
 		public void mouseWheelMoved(MouseWheelEvent e) {
@@ -556,12 +564,12 @@ public class MainFrame extends JFrame {
 			if (e.getSource() == pdfViewPanel && !controller.isMeasuring()) {
 				MyPoint point = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
 				if (e.getButton() == MouseEvent.BUTTON1) {
-					if (controller.hasActiveItem()) {
+					if (controller.hasActive()) {
 						controller.dropToken(point);
 						updateMarks();
 					}
 				} else if (e.getButton() == MouseEvent.BUTTON3) {
-					if (controller.hasActiveItem()) {
+					if (controller.hasActive()) {
 						controller.removeToken(point);
 						updateMarks();
 					} else {
@@ -584,16 +592,16 @@ public class MainFrame extends JFrame {
 		public void mousePressed(MouseEvent e) {
 			if (e.getButton() == MouseEvent.BUTTON1)
 				button1Pressed = true;
-			if (e.getButton() == MouseEvent.BUTTON3)
-				button3Pressed = true;
+//			if (e.getButton() == MouseEvent.BUTTON3)
+//				button3Pressed = true;
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			if (e.getButton() == MouseEvent.BUTTON1)
 				button1Pressed = false;
-			if (e.getButton() == MouseEvent.BUTTON3)
-				button3Pressed = false;
+//			if (e.getButton() == MouseEvent.BUTTON3)
+//				button3Pressed = false;
 		}
 
 		@Override

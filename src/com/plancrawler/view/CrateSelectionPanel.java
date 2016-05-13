@@ -7,7 +7,6 @@ import javax.swing.JTable;
 import com.plancrawler.model.Crate;
 import com.plancrawler.view.support.CrateSelectionTableModel;
 import com.plancrawler.view.support.CrateSelectionTableRenderer;
-import com.plancrawler.view.support.ItemSelectionTableRenderer;
 
 public class CrateSelectionPanel extends SelectionPanel {
 

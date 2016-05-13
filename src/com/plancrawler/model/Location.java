@@ -9,18 +9,20 @@ public class Location implements Serializable {
 
 	private int page;
 	private MyPoint point;
-	private ItemLocations whereAt;
+	
 
-	public Location(int page, MyPoint point, ItemLocations whereAt) {
+	public Location(int page, MyPoint point) {
 		this.page = page;
 		this.point = new MyPoint(point);
-		this.whereAt = whereAt;
 	}
 
 	public boolean isSameLocation(Location other) {
-		return (this.page == other.page && this.whereAt == other.whereAt && MyPoint.dist(this.point, other.point) < 50);
+		boolean samePage = (this.page == other.page);
+		boolean sameSpot = MyPoint.dist(this.point,  other.point) < 50;
+		
+		return (samePage && sameSpot);
 	}
-
+	
 	public int getPage() {
 		return page;
 	}
@@ -37,11 +39,4 @@ public class Location implements Serializable {
 		this.point = new MyPoint(point);
 	}
 
-	public ItemLocations getWhereAt() {
-		return whereAt;
-	}
-
-	public void setWhereAt(ItemLocations whereAt) {
-		this.whereAt = whereAt;
-	}
 }

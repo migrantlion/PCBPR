@@ -7,8 +7,7 @@ import com.plancrawler.model.Location;
 import com.plancrawler.model.Token;
 import com.plancrawler.model.utilities.MyPoint;
 
-public class TokenPainter implements Paintable {
-
+public class CratePainter implements Paintable {
 	private static final long serialVersionUID = 1L;
 	private Token token;
 
@@ -16,7 +15,7 @@ public class TokenPainter implements Paintable {
 	// super(location, color);
 	// }
 	//
-	public TokenPainter(Token token) {
+	public CratePainter(Token token) {
 		this.token = token;
 	}
 
@@ -35,18 +34,11 @@ public class TokenPainter implements Paintable {
 			pt.translate(new MyPoint(-diameter / 2, -diameter / 2));
 
 			g2.setColor(token.getColor());
-			if (token.isInCrate())
-				g2.fillRect((int) pt.getX(), (int) pt.getY(), diameter, diameter);
-			else
-				g2.fillOval((int) pt.getX(), (int) pt.getY(), diameter, diameter);
+			g2.fillRect((int) pt.getX(), (int) pt.getY(), diameter, diameter);
 
 			// add border color
 			g2.setColor(token.getBorderColor());
-			if (token.isInCrate())
-				g2.drawRect((int) pt.getX(), (int) pt.getY(), diameter, diameter);
-			else
-				g2.drawOval((int) pt.getX(), (int) pt.getY(), diameter, diameter);
+			g2.drawRect((int) pt.getX(), (int) pt.getY(), diameter, diameter);
 		}
 	}
-
 }

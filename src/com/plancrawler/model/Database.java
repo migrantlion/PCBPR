@@ -58,7 +58,7 @@ public class Database {
 		if (i == null){
 			System.err.println("Unknown row ("+itemIndex+") requested");
 		} else
-			i.addToken(loc);
+			i.addToken(loc, TokenLocations.ON_PAGE);
 	}
 	
 	public boolean remTokenFromItem(Location loc, int itemIndex){
@@ -190,6 +190,15 @@ public class Database {
 
 	public boolean remCrate(int row) {
 		return warehouse.remCrate(getCrate(row));
+	}
+
+	public void addItemToCrate(Location loc, int itemIndex, int crateIndex) {
+		Item item = getItem(itemIndex);
+		warehouse.addItemToCrate(loc, item, crateIndex);
+	}
+
+	public void addTokenToCrate(Location loc, int crateIndex) {
+		warehouse.addTokenToCrate(loc, crateIndex);
 	}
 	
 }

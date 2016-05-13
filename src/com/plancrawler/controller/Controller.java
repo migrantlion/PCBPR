@@ -11,10 +11,9 @@ import com.plancrawler.model.Crate;
 import com.plancrawler.model.Database;
 import com.plancrawler.model.DocumentHandler;
 import com.plancrawler.model.Item;
-import com.plancrawler.model.ItemLocations;
 import com.plancrawler.model.Location;
 import com.plancrawler.model.Measurement;
-import com.plancrawler.model.Tokens;
+import com.plancrawler.model.Token;
 import com.plancrawler.model.utilities.MyPoint;
 import com.plancrawler.view.support.EntryFormEvent;
 import com.plancrawler.view.toolbars.RotToolbarEvent;
@@ -26,6 +25,7 @@ public class Controller {
 	private int activeItemRow = -1;
 	private boolean isMeasuring = false;
 	private int activeCrateRow = -1;
+	private int cratePanelActive = -1;;
 
 	public Controller() {
 		this.db = Database.getInstance();
@@ -87,14 +87,26 @@ public class Controller {
 		List<Item> items = getItems();
 		List<TokenPainter> tokenPainter = new ArrayList<TokenPainter>();
 		List<Paintable> paintable = new ArrayList<Paintable>();
+		List<Token> tokens;
 
 		// add item tokens
 		for (Item i : items) {
-			List<Tokens> tokens = i.getTokensOnPage(page);
-			for (Tokens t : tokens)
+			tokens = i.getTokensOnPage(page);
+			for (Token t : tokens)
 				tokenPainter.add(new TokenPainter(t));
 			tokens.clear();
 		}
+		paintable.addAll(tokenPainter);
+
+		// add crate info
+		List<Crate> crates = getCrates();
+		List<CratePainter> ctokens = new ArrayList<CratePainter>();
+		for (Crate c : crates) {
+			tokens = c.getTokensOnPage(page);
+			for (Token t : tokens)
+				ctokens.add(new CratePainter(t));
+		}
+		paintable.addAll(ctokens);
 		paintable.addAll(tokenPainter);
 
 		// add measurement marks
@@ -145,15 +157,24 @@ public class Controller {
 	}
 
 	public void dropToken(MyPoint point) {
-		if (hasActiveItem()) {
-			Location loc = new Location(getCurrentPage(), point, ItemLocations.ON_PAGE);
+		Location loc;
+		if (hasActiveItem() && hasActiveCrate()) {
+			// place item in crate
+			loc = new Location(getCurrentPage(), point);
+			db.addItemToCrate(loc, activeItemRow, activeCrateRow);
+		} else if (hasActiveCrate()) {
+			// place crate on page
+			loc = new Location(getCurrentPage(), point);
+			db.addTokenToCrate(loc, activeCrateRow);
+		} else if (hasActiveItem()) {
+			loc = new Location(getCurrentPage(), point);
 			db.addTokenToItem(loc, activeItemRow);
 		}
 	}
 
 	public void removeToken(MyPoint point) {
 		if (hasActiveItem()) {
-			Location loc = new Location(getCurrentPage(), point, ItemLocations.ON_PAGE);
+			Location loc = new Location(getCurrentPage(), point);
 			db.remTokenFromItem(loc, activeItemRow);
 		}
 	}
@@ -242,5 +263,24 @@ public class Controller {
 
 	public boolean deleteCrateRow(int row) {
 		return db.remCrate(row);
+	}
+
+	public boolean hasActive() {
+		return hasActiveCrate() || hasActiveItem();
+	}
+
+	public void setCratePanelActive(int row) {
+		this.cratePanelActive = row;
+	}
+
+	public int getCratePanelActive() {
+		return cratePanelActive;
+	}
+
+	public String getCrateName(int crateIndex) {
+		if (crateIndex < 0)
+			return "none";
+		else
+			return db.getCrate(crateIndex).getName();
 	}
 }

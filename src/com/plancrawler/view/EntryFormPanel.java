@@ -38,6 +38,7 @@ public class EntryFormPanel extends JPanel {
 	private JButton colorButt;
 	private JButton addItemButt, addCrateButt;
 	private Color nocolor;
+	private Border origBorder;
 
 	public EntryFormPanel() {
 		setupPanel();
@@ -60,6 +61,7 @@ public class EntryFormPanel extends JPanel {
 		descLabel = new JLabel("description:");
 		catLabel = new JLabel("category:");
 		nameField = new JTextField(10);
+		origBorder = nameField.getBorder();
 		descField = new JTextField(10);
 		colorLabel = new JLabel("color");
 		colorLabel.setOpaque(true);
@@ -97,8 +99,10 @@ public class EntryFormPanel extends JPanel {
 		nameLabel.setDisplayedMnemonic(KeyEvent.VK_N);
 		descLabel.setDisplayedMnemonic(KeyEvent.VK_D);
 
-		addItemButt.setMnemonic(KeyEvent.VK_A);
+		addItemButt.setMnemonic(KeyEvent.VK_ENTER);
+		addItemButt.setToolTipText("Add entry as item.  alt-RET quick-key");
 		addCrateButt.setMnemonic(KeyEvent.VK_C);
+		addCrateButt.setToolTipText("Add entry as crate.  alt-C quick-key");
 		colorButt.setMnemonic(KeyEvent.VK_O);
 
 		layoutComponents();
@@ -150,17 +154,27 @@ public class EntryFormPanel extends JPanel {
 		// next Row
 		gc.gridy++;
 		gc.gridx = 0;
-		gc.anchor = GridBagConstraints.NORTH;
+		gc.anchor = GridBagConstraints.CENTER;
 		gc.insets = rightPad;
 		add(colorLabel, gc);
 		gc.gridx = 1;
-		gc.anchor = GridBagConstraints.NORTHWEST;
+		gc.anchor = GridBagConstraints.WEST;
 		gc.insets = noPad;
 		add(colorButt, gc);
 
+		// blank
+		gc.gridy++;
+		gc.gridx = 0;
+		gc.weighty = 1.0;
+		gc.fill = GridBagConstraints.HORIZONTAL;
+		add(new JLabel("  "), gc);
+		gc.gridx = 1;
+		add(new JLabel("  "), gc);
+		
 		// separator
 		gc.gridy++;
 		gc.gridx = 0;
+		gc.weighty = 1.0;
 		gc.fill = GridBagConstraints.HORIZONTAL;
 		gc.gridwidth = GridBagConstraints.REMAINDER;
 		add(new JSeparator(JSeparator.HORIZONTAL), gc);
@@ -179,6 +193,7 @@ public class EntryFormPanel extends JPanel {
 
 	public void clearForm() {
 		nameField.setText("");
+		nameField.setBorder(origBorder);
 		descField.setText("");
 		setColorLabelColor(ColorUtility.randColor());
 	}
@@ -203,6 +218,11 @@ public class EntryFormPanel extends JPanel {
 
 	private class ItemFormButtListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			if (nameField.getText().isEmpty()) {
+				nameField.setBorder(BorderFactory.createLineBorder(Color.red, 1));
+				return;
+			}
+
 			EntryFormEvent ie = new EntryFormEvent(EntryFormPanel.this);
 			ie.setEntryName(nameField.getText());
 			ie.setEntryDesc(descField.getText());

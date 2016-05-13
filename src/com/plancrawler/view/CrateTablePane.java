@@ -30,6 +30,7 @@ public class CrateTablePane extends JPanel {
 	private JTable table;
 	private CrateTableModel tableModel = new CrateTableModel();
 	private List<TableItemSelectionListener> listeners = new ArrayList<TableItemSelectionListener>();
+	private int selectedRow = -1;
 
 	public CrateTablePane() {
 		table = new JTable(tableModel);
@@ -51,10 +52,13 @@ public class CrateTablePane extends JPanel {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				int row = table.rowAtPoint(e.getPoint());
-				table.getSelectionModel().setSelectionInterval(row, row);
-				if (e.getButton() == MouseEvent.BUTTON3) {
-					table.clearSelection();
+				if (selectedRow == row) {
 					row = -1;
+					selectedRow = -1;
+					table.clearSelection();
+				} else {
+					selectedRow = row;
+					table.getSelectionModel().setSelectionInterval(row, row);
 				}
 				alertListeners(new TableItemSelectionEvent(CrateTablePane.this, row, false, false));
 			}
@@ -67,6 +71,7 @@ public class CrateTablePane extends JPanel {
 
 	public void refresh() {
 		tableModel.fireTableDataChanged();
+		selectedRow = -1;
 	}
 
 	private void alertListeners(TableItemSelectionEvent e) {

@@ -16,8 +16,6 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 
-import com.plancrawler.model.Item;
-import com.plancrawler.view.support.ItemSelectionTableRenderer;
 import com.plancrawler.view.support.TableItemSelectionEvent;
 import com.plancrawler.view.support.TableItemSelectionListener;
 
@@ -28,6 +26,7 @@ public abstract class SelectionPanel extends JPanel {
 	private JPopupMenu popup = new JPopupMenu();
 	private List<TableItemSelectionListener> listeners = new ArrayList<TableItemSelectionListener>();
 	protected String title;
+	private int selectedRow = -1;
 
 	public SelectionPanel() {
 		setTableModel();
@@ -36,12 +35,12 @@ public abstract class SelectionPanel extends JPanel {
 	}
 
 	abstract protected void setTableModel();
-//	{
-//		ItemSelectionTableRenderer renderer = new ItemSelectionTableRenderer();
-//		table.setDefaultRenderer(table.getColumnClass(0), renderer);
-//		tableModel = new ItemSelectionTableModel();
-//		this.table = new JTable(tableModel);
-//	}
+	// {
+	// ItemSelectionTableRenderer renderer = new ItemSelectionTableRenderer();
+	// table.setDefaultRenderer(table.getColumnClass(0), renderer);
+	// tableModel = new ItemSelectionTableModel();
+	// this.table = new JTable(tableModel);
+	// }
 
 	private void setupPanel() {
 		Dimension dim = getPreferredSize();
@@ -57,9 +56,16 @@ public abstract class SelectionPanel extends JPanel {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				int row = table.rowAtPoint(e.getPoint());
-				table.getSelectionModel().setSelectionInterval(row, row);
-				if (e.getButton() == MouseEvent.BUTTON3) {
-					popup.show(table, e.getX(), e.getY());
+				if (selectedRow == row && e.getButton() == MouseEvent.BUTTON1) {
+					selectedRow = -1;
+					row = -1;
+					table.clearSelection();
+				} else {
+					selectedRow = row;
+					table.getSelectionModel().setSelectionInterval(row, row);
+					if (e.getButton() == MouseEvent.BUTTON3) {
+						popup.show(table, e.getX(), e.getY());
+					}
 				}
 				alertListeners(new TableItemSelectionEvent(SelectionPanel.this, row, false, false));
 			}
@@ -69,13 +75,6 @@ public abstract class SelectionPanel extends JPanel {
 	}
 
 	private void addButtons() {
-		JMenuItem clearSelectItem = new JMenuItem("de-select");
-		clearSelectItem.addActionListener((e) -> {
-			table.clearSelection();
-			alertListeners(new TableItemSelectionEvent(SelectionPanel.this, -1, false, false));
-		});
-		popup.add(clearSelectItem);
-
 		JMenuItem remItem = new JMenuItem("delte row");
 		remItem.addActionListener((e) -> {
 			int row = table.getSelectedRow();
@@ -104,12 +103,13 @@ public abstract class SelectionPanel extends JPanel {
 		return listeners.remove(l);
 	}
 
-//	abstract void setData(List<Item> db);
-//	{
-//		tableModel.setData(db);
-//	}
+	// abstract void setData(List<Item> db);
+	// {
+	// tableModel.setData(db);
+	// }
 
 	public void refresh() {
 		tableModel.fireTableDataChanged();
+		selectedRow = -1;
 	}
 }

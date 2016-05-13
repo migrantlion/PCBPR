@@ -36,7 +36,7 @@ public class CrateDatabase implements Serializable {
 	}
 
 	public List<Item> getItemsInCrate(Crate crate) {
-		return Collections.unmodifiableList(crate.getItems());
+		return Collections.unmodifiableList(crate.getItemsInCrate());
 	}
 
 	public List<Crate> getCrates() {
@@ -81,5 +81,22 @@ public class CrateDatabase implements Serializable {
 			return null;
 		else
 			return crates.get(index);
+	}
+	
+
+	public void addItemToCrate(Location loc, Item item, int crateIndex) {
+		Crate crate = getCrate(crateIndex);
+		if (crate == null)
+			return;
+		
+		crate.addItemToCrateAtLocation(item, loc);;
+	}
+
+	public void addTokenToCrate(Location loc, int crateIndex) {
+		Crate crate = getCrate(crateIndex);
+		if (crate == null)
+			return;
+		
+		crate.addToken(loc);
 	}
 }

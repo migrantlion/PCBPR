@@ -3,7 +3,7 @@ package com.plancrawler.model;
 import java.awt.Color;
 import java.io.Serializable;
 
-public class Entry implements Serializable {
+public class Entry implements Serializable, Comparable<Entry> {
 	private static final long serialVersionUID = 1L;
 	protected String name;
 	protected String description;
@@ -34,6 +34,17 @@ public class Entry implements Serializable {
 	}
 	public void setColor(Color color) {
 		this.color = color;
+	}
+	public boolean sameAs(Entry other){
+		return (this.compareTo(other) == 0 && this.description.equals(other.description) && this.color.equals(other.color));
+	}
+	
+	@Override
+	public int compareTo(Entry other) {
+		if (this.category == other.category)
+			return this.name.compareTo(other.name);
+		else
+			return this.category.compareTo(other.category);
 	}
 	
 }

@@ -3,30 +3,45 @@ package com.plancrawler.model;
 import java.awt.Color;
 import java.io.Serializable;
 
-
-public class Tokens implements Serializable {
+public class Token implements Serializable, Countable {
 	private static final long serialVersionUID = 1L;
 
 	private Location location;
+	private TokenLocations whereAt;
+	private Crate crate = null;
 	private boolean visible;
 	private Color color;
 	private Color borderColor;
-	
-	public Tokens(Location location, Color color) {
+
+	public Token(Location location, Color color, TokenLocations whereAt) {
 		this.location = location;
 		this.color = color;
 		this.borderColor = color;
+		this.whereAt = whereAt;
 		visible = true;
 	}
 
+	public Token(Location location, Color color, TokenLocations whereAt, Crate crate) {
+		this(location, color, whereAt);
+		this.crate = crate;
+	}
+
+	public void setCrate(Crate crate) {
+		this.crate = crate;
+	}
+
 	public boolean isOnPage(int page) {
-		return (location.getWhereAt() == ItemLocations.ON_PAGE && location.getPage() == page);
+		return (location.getPage() == page);
 	}
-	
-	public boolean isCountable() {
-		return (location.getWhereAt() != ItemLocations.IN_WAREHOUSE);
+
+	public boolean isInCrate() {
+		return whereAt == TokenLocations.IN_CRATE;
 	}
-	
+
+	public boolean isInCrate(Crate crate) {
+		return (isInCrate() && this.crate.equals(crate));
+	}
+
 	public boolean isAtLocation(Location loc) {
 		return location.isSameLocation(loc);
 	}
@@ -62,5 +77,17 @@ public class Tokens implements Serializable {
 	public void setBorderColor(Color borderColor) {
 		this.borderColor = borderColor;
 	}
-	
+
+	@Override
+	public int count() {
+		if (isInCrate())
+			return 0;
+		else
+			return 1;
+	}
+
+	public TokenLocations getWhereAt() {
+		return whereAt;
+	}
+
 }

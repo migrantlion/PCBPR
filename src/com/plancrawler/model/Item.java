@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class Item extends Entry implements Serializable, Comparable<Item> {
+public class Item extends Entry implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private static int counter = 0;
@@ -18,7 +18,7 @@ public class Item extends Entry implements Serializable, Comparable<Item> {
 //	private String category;
 //	private Color color;
 
-	private CopyOnWriteArrayList<Tokens> tokens = new CopyOnWriteArrayList<Tokens>();
+	private CopyOnWriteArrayList<Token> tokens = new CopyOnWriteArrayList<Token>();
 
 	public Item(String name, String description, String category, Color color) {
 		this.name = name;
@@ -28,15 +28,24 @@ public class Item extends Entry implements Serializable, Comparable<Item> {
 		this.id = counter;
 		counter++;
 	}
+	
+	public Item(Entry entry){
+		this(entry.name, entry.description, entry.category, entry.color);
+	}
 
-	public void addToken(Location loc) {
-		Tokens token = new Tokens(loc, color);
+	public void addToken(Location loc, TokenLocations whereAt) {
+		Token token = new Token(loc, color, whereAt);
+		tokens.add(token);
+	}
+	
+	public void addToken(Location loc, TokenLocations whereAt, Crate crate) {
+		Token token = new Token(loc, color, whereAt, crate);
 		tokens.add(token);
 	}
 
 	public boolean remToken(Location loc) {
-		Tokens token = null;
-		for (Tokens t : tokens)
+		Token token = null;
+		for (Token t : tokens)
 			if (t.isAtLocation(loc))
 				token = t;
 
@@ -48,16 +57,15 @@ public class Item extends Entry implements Serializable, Comparable<Item> {
 
 	public int getTokenCount() {
 		int count = 0;
-		for (Tokens t : tokens) {
-			if (t.isCountable())
-				count++;
+		for (Token t : tokens) {
+			count += t.count();
 		}
 		return count;
 	}
 	
-	public List<Tokens> getTokensOnPage(int page) {
-		List<Tokens> tokensOnPage = new ArrayList<Tokens>();
-		for (Tokens t : tokens)
+	public List<Token> getTokensOnPage(int page) {
+		List<Token> tokensOnPage = new ArrayList<Token>();
+		for (Token t : tokens)
 			if (t.isOnPage(page))
 				tokensOnPage.add(t);
 		return tokensOnPage;
@@ -67,8 +75,10 @@ public class Item extends Entry implements Serializable, Comparable<Item> {
 		List<Integer> pages = new ArrayList<Integer>();
 		List<Integer> uniquePages = new ArrayList<Integer>();
 		
-		for (Tokens t : tokens)
-			pages.add(t.getLocation().getPage());
+		for (Token t : tokens) {
+			if (t.getWhereAt() == TokenLocations.ON_PAGE)
+				pages.add(t.getLocation().getPage());
+		}
 		
 		Collections.sort(pages);
 		for (int i : pages)
@@ -78,45 +88,17 @@ public class Item extends Entry implements Serializable, Comparable<Item> {
 		return uniquePages;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getCategory() {
-		return category;
-	}
-
-	public void setCategory(String category) {
-		this.category = category;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
 	public void setColor(Color color) {
 		this.color = color;
-		for (Tokens t: tokens)
+		for (Token t: tokens)
 			t.setColor(color);
 	}
 
-	public CopyOnWriteArrayList<Tokens> getTokens() {
+	public CopyOnWriteArrayList<Token> getTokens() {
 		return tokens;
 	}
 
-	public void setTokens(CopyOnWriteArrayList<Tokens> tokens) {
+	public void setTokens(CopyOnWriteArrayList<Token> tokens) {
 		this.tokens = tokens;
 	}
 
@@ -124,15 +106,16 @@ public class Item extends Entry implements Serializable, Comparable<Item> {
 		return id;
 	}
 
-	@Override
-	public int compareTo(Item other) {
-		if (this.category == other.category)
-			return this.name.compareTo(other.name);
-		else
-			return this.category.compareTo(other.category);
-	}
-
 	public void wipeTokens() {
 		tokens.clear();
+	}
+
+	public void addToken(Token token) {
+		token.setColor(color);
+		tokens.add(token);
+	}
+	
+	public boolean remToken(Token token){
+		return tokens.remove(token);
 	}
 }
