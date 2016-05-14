@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -13,10 +14,13 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -68,16 +72,32 @@ public class MainFrame extends JFrame {
 	
 	// Panels
 	private JPanel westPanel;
-//	private JPanel eastPanel;
+	private JPanel eastPanel;
 
 	private Controller controller = new Controller();
 
 	public MainFrame() {
 		super("PlanCrawler BluePrint Reader");
+
+		List<Image> spiders = new ArrayList<Image>();
+		spiders.add(createIcon("/com/plancrawler/view/iconImages/Spider8.gif").getImage());
+		spiders.add(createIcon("/com/plancrawler/view/iconImages/Spider10.gif").getImage());
+		spiders.add(createIcon("/com/plancrawler/view/iconImages/Spider16.gif").getImage());
+		this.setIconImages(spiders);
+		
 		setup();
 		addComponents();
 	}
+	
+	private ImageIcon createIcon(String string) {
+		URL url = getClass().getResource(string);
+		if (url == null)
+			System.err.println("could not load resource " + string);
 
+		ImageIcon icon = new ImageIcon(url);
+		return icon;
+	}
+	
 	private void setup() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
@@ -92,7 +112,7 @@ public class MainFrame extends JFrame {
 	private void addComponents() {
 		addToolbarComponents();
 		addWestComponents();
-//		addEastComponents();
+		addEastComponents();
 		addCenterComponents();
 	}
 
@@ -174,6 +194,34 @@ public class MainFrame extends JFrame {
 
 		tablePanel.setData(controller.getItems());
 
+//		cratePanel.setData(controller.getCrates());
+//		cratePanel.addTableListener((t)->{
+//			controller.setCratePanelActive(t.getRow());
+//			itemsInCratePanel.setTitle("Items in Crate:  "+controller.getActiveCrateName());
+//			itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
+//			itemsInCratePanel.refresh();
+//		});
+//		
+//		itemsInCratePanel.setData(controller.getItemsInCrate(-1));
+//
+//		JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, cratePanel, itemsInCratePanel);
+//		splitPanel.setDividerLocation(0.5);
+//		splitPanel.setOneTouchExpandable(true);
+
+		centerTabPane.addTab("PDF View", pdfViewPanel);
+		centerTabPane.addTab("Take-Off View", tablePanel);
+//		centerTabPane.addTab("Crate View", splitPanel);
+
+		this.add(centerTabPane, BorderLayout.CENTER);
+	}
+
+	private void addEastComponents(){
+		eastPanel = new JPanel();
+//		Dimension dim = eastPanel.getPreferredSize();
+//		dim.width = 450;
+//		eastPanel.setPreferredSize(dim);
+		eastPanel.setLayout(new GridLayout(0,1));
+		
 		cratePanel.setData(controller.getCrates());
 		cratePanel.addTableListener((t)->{
 			controller.setCratePanelActive(t.getRow());
@@ -181,29 +229,16 @@ public class MainFrame extends JFrame {
 			itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
 			itemsInCratePanel.refresh();
 		});
-		
+	
 		itemsInCratePanel.setData(controller.getItemsInCrate(-1));
-
+	
 		JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, cratePanel, itemsInCratePanel);
 		splitPanel.setDividerLocation(0.5);
 		splitPanel.setOneTouchExpandable(true);
-
-		centerTabPane.addTab("PDF View", pdfViewPanel);
-		centerTabPane.addTab("Take-Off View", tablePanel);
-		centerTabPane.addTab("Crate View", splitPanel);
-
-		this.add(centerTabPane, BorderLayout.CENTER);
+		
+		eastPanel.add(splitPanel);
+		this.add(eastPanel, BorderLayout.EAST);
 	}
-
-//	private void addEastComponents(){
-//		eastPanel = new JPanel();
-//		eastPanel.setLayout(new GridLayout(0,1));
-//		
-//		eastPanel.add(cratePanel);
-//		eastPanel.add(itemsInCratePanel);
-//		
-//		this.add(eastPanel, BorderLayout.EAST);
-//	}
 	
 	private void addWestComponents() {
 		westPanel = new JPanel();
@@ -572,13 +607,13 @@ public class MainFrame extends JFrame {
 			});
 			showPaneMenu.add(addWestWindow);
 			
-//			JCheckBoxMenuItem addEastWindow = new JCheckBoxMenuItem("Right Panel");
-//			addEastWindow.setSelected(true);
-//			addEastWindow.addActionListener((e) -> {
-//				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
-//				eastPanel.setVisible(menuItem.isSelected());
-//			});
-//			showPaneMenu.add(addEastWindow);
+			JCheckBoxMenuItem addEastWindow = new JCheckBoxMenuItem("East Panel");
+			addEastWindow.setSelected(true);
+			addEastWindow.addActionListener((e) -> {
+				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
+				eastPanel.setVisible(menuItem.isSelected());
+			});
+			showPaneMenu.add(addEastWindow);
 
 			windowMenu.add(showPaneMenu);
 
