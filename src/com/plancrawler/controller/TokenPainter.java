@@ -8,8 +8,6 @@ import com.plancrawler.model.Token;
 import com.plancrawler.model.utilities.MyPoint;
 
 public class TokenPainter implements Paintable {
-
-	private static final long serialVersionUID = 1L;
 	private Token token;
 
 	// public TokenPainter(Location location, Color color) {
