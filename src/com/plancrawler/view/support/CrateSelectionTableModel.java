@@ -44,7 +44,7 @@ public class CrateSelectionTableModel extends AbstractTableModel {
 		case 2:
 			return crate.getDescription();
 		case 3:
-			return crate.getItemCount();
+			return crate.getItemsInCrateCount();
 		}
 		return null;
 	}

@@ -32,11 +32,12 @@ public class CrateDatabase implements Serializable {
 	}
 
 	public boolean remCrate(Crate crate) {
+		crate.clearCrate();
 		return crates.remove(crate);
 	}
 
 	public List<Item> getItemsInCrate(Crate crate) {
-		return Collections.unmodifiableList(crate.getItemsInCrate());
+		return Collections.unmodifiableList(crate.getItemsOnlyInCrate());
 	}
 
 	public List<Crate> getCrates() {
@@ -98,5 +99,20 @@ public class CrateDatabase implements Serializable {
 			return;
 		
 		crate.addToken(loc);
+	}
+
+	public void remItemFromCrate(Location loc, Item item, int crateIndex) {
+		Crate crate = getCrate(crateIndex);
+		crate.remItemInCrateAtLocation(loc, item);
+	}
+
+	public void remTokenFromCrate(Location loc, int crateIndex) {
+		Crate crate = getCrate(crateIndex);
+		crate.remToken(loc); 
+	}
+
+	public void removeItemInstances(Item item) {
+		for (Crate crate : crates)
+			crate.removeItemInstancesFromCrate(item);
 	}
 }

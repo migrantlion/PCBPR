@@ -43,6 +43,17 @@ public class Item extends Entry implements Serializable {
 		tokens.add(token);
 	}
 
+	public boolean remVisibleToken(Location loc){
+		Token token = null;
+		for (Token t : tokens)
+			if (t.isAtLocation(loc) && (!t.isInCrate()) && t.isVisible())
+				token = t;
+		if (token == null)
+			return false;
+		else
+			return tokens.remove(token);
+	}
+	
 	public boolean remToken(Location loc) {
 		Token token = null;
 		for (Token t : tokens)

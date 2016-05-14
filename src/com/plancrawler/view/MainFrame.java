@@ -12,6 +12,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -42,6 +43,7 @@ import com.plancrawler.view.toolbars.MeasureToolbar;
 import com.plancrawler.view.toolbars.NavToolbar;
 import com.plancrawler.view.toolbars.RotateToolbar;
 import com.plancrawler.view.toolbars.SaveLoadToolbar;
+import com.plancrawler.view.toolbars.SelectionNotifierToolbar;
 
 public class MainFrame extends JFrame {
 
@@ -53,6 +55,7 @@ public class MainFrame extends JFrame {
 	private RotateToolbar rotToolbar;
 	private FocusToolbar focusToolbar;
 	private MeasureToolbar measToolbar;
+	private SelectionNotifierToolbar selNotifyToolbar;
 
 	// Panes
 	private EntryFormPanel entryFormPanel = new EntryFormPanel();
@@ -62,6 +65,10 @@ public class MainFrame extends JFrame {
 	private PDFViewPane pdfViewPanel = new PDFViewPane();
 	private ItemSelectionPanel itemSelectPanel = new ItemSelectionPanel();
 	private CrateSelectionPanel crateSelectPanel = new CrateSelectionPanel();
+	
+	// Panels
+	private JPanel westPanel;
+//	private JPanel eastPanel;
 
 	private Controller controller = new Controller();
 
@@ -85,6 +92,7 @@ public class MainFrame extends JFrame {
 	private void addComponents() {
 		addToolbarComponents();
 		addWestComponents();
+//		addEastComponents();
 		addCenterComponents();
 	}
 
@@ -139,6 +147,9 @@ public class MainFrame extends JFrame {
 				requestDraw(m.getMeas());
 		});
 		toolPanel.add(measToolbar);
+		
+		selNotifyToolbar = new SelectionNotifierToolbar();
+		toolPanel.add(selNotifyToolbar);
 
 		setToolbarFloat(false); // initially set all to locked
 		this.add(toolPanel, BorderLayout.PAGE_START);
@@ -150,6 +161,7 @@ public class MainFrame extends JFrame {
 		rotToolbar.setFloatable(state);
 		focusToolbar.setFloatable(state);
 		measToolbar.setFloatable(state);
+		selNotifyToolbar.setFloatable(state);
 	}
 
 	private void addCenterComponents() {
@@ -165,7 +177,7 @@ public class MainFrame extends JFrame {
 		cratePanel.setData(controller.getCrates());
 		cratePanel.addTableListener((t)->{
 			controller.setCratePanelActive(t.getRow());
-			itemsInCratePanel.setTitle("Items in Crate:  "+controller.getCrateName(controller.getCratePanelActive()));
+			itemsInCratePanel.setTitle("Items in Crate:  "+controller.getActiveCrateName());
 			itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
 			itemsInCratePanel.refresh();
 		});
@@ -183,13 +195,22 @@ public class MainFrame extends JFrame {
 		this.add(centerTabPane, BorderLayout.CENTER);
 	}
 
+//	private void addEastComponents(){
+//		eastPanel = new JPanel();
+//		eastPanel.setLayout(new GridLayout(0,1));
+//		
+//		eastPanel.add(cratePanel);
+//		eastPanel.add(itemsInCratePanel);
+//		
+//		this.add(eastPanel, BorderLayout.EAST);
+//	}
+	
 	private void addWestComponents() {
-		JPanel westPanel = new JPanel();
+		westPanel = new JPanel();
 		westPanel.setLayout(new GridLayout(0, 1));
 
 		entryFormPanel.addFormListener((e) -> {
 			int action = JOptionPane.OK_OPTION;
-			;
 			if (e.isAddItem()) {
 				if (controller.hasItemByName(e.getEntryName())) {
 					action = JOptionPane.showConfirmDialog(MainFrame.this,
@@ -219,6 +240,7 @@ public class MainFrame extends JFrame {
 		itemSelectPanel.setData(controller.getItems());
 		itemSelectPanel.addItemSelectionListener((e) -> {
 			controller.setActiveItemRow(e.getRow());
+			setSelNotifyToolbar();
 			if (e.isDeleteRequest()) {
 				controller.deleteItemRow(e.getRow());
 				refreshTables();
@@ -233,6 +255,7 @@ public class MainFrame extends JFrame {
 		crateSelectPanel.setData(controller.getCrates());
 		crateSelectPanel.addItemSelectionListener((e) -> {
 			controller.setActiveCrateRow(e.getRow());
+			setSelNotifyToolbar();
 			if (e.isDeleteRequest()) {
 				controller.deleteCrateRow(e.getRow());
 				refreshTables();
@@ -247,13 +270,35 @@ public class MainFrame extends JFrame {
 		this.add(westPanel, BorderLayout.WEST);
 
 	}
+	
+	private void setSelNotifyToolbar(){
+		selNotifyToolbar.changeTitle(controller.getActiveItemName(), controller.getActiveCrateName());
+	}
+	
+	private void resetTableData(){
+		controller.setActiveCrateRow(-1);
+		controller.setActiveItemRow(-1);
+		controller.setCratePanelActive(-1);
+		setSelNotifyToolbar();
+		
+		itemSelectPanel.setData(controller.getItems());
+		crateSelectPanel.setData(controller.getCrates());
+		tablePanel.setData(controller.getItems());
+		cratePanel.setData(controller.getCrates());
+		refreshTables();
+	}
 
 	private void refreshTables() {
+		controller.setActiveCrateRow(-1);
+		controller.setActiveItemRow(-1);
+		controller.setCratePanelActive(-1);
+		setSelNotifyToolbar();
+		
 		tablePanel.refresh();
 		itemSelectPanel.refresh();
 		crateSelectPanel.refresh();
 		cratePanel.refresh();
-		itemsInCratePanel.setTitle("Items in Crate:  "+controller.getCrateName(controller.getCratePanelActive()));
+		itemsInCratePanel.setTitle("Items in Crate:  "+controller.getActiveCrateName());
 		itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
 		itemsInCratePanel.refresh();
 		// if tables are updated, then Marks probably need to be as well
@@ -362,7 +407,7 @@ public class MainFrame extends JFrame {
 						navToolbar.setCurrPage(0);
 						navToolbar.setLastPage(controller.getNumPages());
 						navToolbar.doneProgress();
-						refreshTables();
+						resetTableData();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					} catch (ExecutionException e) {
@@ -399,7 +444,12 @@ public class MainFrame extends JFrame {
 				@Override
 				public void run() {
 					try {
-						controller.saveToFile(fileChooser.getSelectedFile());
+						File file;
+						if (!fileChooser.getSelectedFile().getAbsolutePath().endsWith(".pto"))
+							file = new File(fileChooser.getSelectedFile().getAbsolutePath()+".pto");
+						else
+							file = fileChooser.getSelectedFile();
+						controller.saveToFile(file);
 						refreshTables();
 					} catch (Exception e1) {
 						JOptionPane.showMessageDialog(MainFrame.this, "Could save data to file.", "Error saving file",
@@ -514,13 +564,21 @@ public class MainFrame extends JFrame {
 
 			JMenu showPaneMenu = new JMenu("Show Pane");
 
-			JCheckBoxMenuItem addItemWindow = new JCheckBoxMenuItem("Add Item Form");
-			addItemWindow.setSelected(true);
-			addItemWindow.addActionListener((e) -> {
+			JCheckBoxMenuItem addWestWindow = new JCheckBoxMenuItem("West Panel");
+			addWestWindow.setSelected(true);
+			addWestWindow.addActionListener((e) -> {
 				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
-				entryFormPanel.setVisible(menuItem.isSelected());
+				westPanel.setVisible(menuItem.isSelected());
 			});
-			showPaneMenu.add(addItemWindow);
+			showPaneMenu.add(addWestWindow);
+			
+//			JCheckBoxMenuItem addEastWindow = new JCheckBoxMenuItem("Right Panel");
+//			addEastWindow.setSelected(true);
+//			addEastWindow.addActionListener((e) -> {
+//				JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem) e.getSource();
+//				eastPanel.setVisible(menuItem.isSelected());
+//			});
+//			showPaneMenu.add(addEastWindow);
 
 			windowMenu.add(showPaneMenu);
 

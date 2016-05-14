@@ -126,7 +126,7 @@ public class CrateTablePane extends JPanel {
 			case 2:
 				return crate.getDescription();
 			case 3:
-				return crate.getItemCount();
+				return crate.getItemsInCrateCount();
 			case 4:
 				return crate.getCategory();
 			case 5:

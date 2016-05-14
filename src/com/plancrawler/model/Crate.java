@@ -4,15 +4,19 @@ import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class Crate extends Entry implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private HashMap<Location, Item> itemsInCrate = new HashMap<Location, Item>();
-	private HashMap<Location, ArrayList<Token>> registeredTokens = new HashMap<Location, ArrayList<Token>>();
 	private List<Token> crateTokens = new ArrayList<Token>();
+	private class TokenDB {
+		Location index;
+		Item item;
+		List<Token> placedTokens = new ArrayList<Token>();
+		Token locInCrateToken;
+	}
+	private List<TokenDB> tokenDB = new ArrayList<TokenDB>();
 
 	public Crate(String name, String description, String category, Color color) {
 		this.name = name;
@@ -20,92 +24,95 @@ public class Crate extends Entry implements Serializable {
 		this.category = category;
 		this.color = color;
 	}
-	
-	public void clearCrateContents() {
-		itemsInCrate.clear();
-	}
 
-	public List<Item> getItemsInCrate() {
+	public List<Item> getItemsOnlyInCrate() {
 		List<Item> items = new ArrayList<Item>();
 
-		for (Location loc : itemsInCrate.keySet()) {
-			Item crateItem = itemsInCrate.get(loc);
-			Item passItem = new Item(crateItem);
-			for (Token t : crateItem.getTokens()){
-				if (t.isInCrate(this)){
-					Token passT = new Token(t.getLocation(), t.getColor(), TokenLocations.ON_PAGE, this);
-					passItem.addToken(passT);
-				}
-			}
-			boolean addThis = true;
-			for (Item i : items)
-				if (i.sameAs(passItem))
-					addThis = false;
-			if (addThis)
-				items.add(passItem);
+		for (TokenDB entry : tokenDB) {
+			// create a new item, since we only want to put in tokens which are
+			// in this crate
+			Item item = new Item(entry.item);
+			// create a new token which is not "in crate" so that it can be
+			// counted by the tables
+			Token tToken = new Token(entry.locInCrateToken.getLocation(), entry.locInCrateToken.getColor(),
+					TokenLocations.ON_PAGE, this);
+			item.addToken(tToken);
+			items.add(item);
 		}
-
 		return Collections.unmodifiableList(items);
 	}
 
 	public void addItemToCrateAtLocation(Item item, Location location) {
-		itemsInCrate.put(location, item);
-		registeredTokens.put(location, new ArrayList<Token>());
-		// add a token to the item indicating it is in this crate
-		item.addToken(location, TokenLocations.IN_CRATE, this);
-		
+		TokenDB newEntry = new TokenDB();
+
+		newEntry.item = item;
+		newEntry.index = location;
+		newEntry.locInCrateToken = new Token(location, item.getColor(), TokenLocations.IN_CRATE, this);
+		newEntry.locInCrateToken.setBorderColor(this.color);
+		item.addToken(newEntry.locInCrateToken);
+
 		// now update item tokens for places where crate has been placed
-		for (Token t : crateTokens){
-			Token token = new Token(t.getLocation(), t.getColor(), TokenLocations.ON_PAGE, this);
+		for (Token t : crateTokens) {
+			Token token = new Token(t.getLocation(), item.getColor(), TokenLocations.ON_PAGE, this);
+			token.setBorderColor(color);
 			token.setVisible(false);
 			item.addToken(token);
-			registeredTokens.get(location).add(token);
+			newEntry.placedTokens.add(token);
 		}
+
+		tokenDB.add(newEntry);
+	}
+
+	private TokenDB getTokenDBAtLocation(Location location) {
+		TokenDB tdb = null;
+		for (TokenDB t : tokenDB)
+			if (t.index.isSameLocation(location))
+				tdb = t;
+		return tdb;
 	}
 
 	public boolean remItemInCrateAtLocation(Location location) {
-		Location keyLoc = null;
-		for (Location loc : itemsInCrate.keySet())
-			if (loc.isSameLocation(location))
-				keyLoc = loc;
-
-		if (keyLoc == null)
+		TokenDB tdb = getTokenDBAtLocation(location);
+		if (tdb == null)
 			return false;
-		else {
-			Item i = itemsInCrate.get(keyLoc);
-			for (Token t : registeredTokens.get(keyLoc))
-				i.remToken(t);
-			itemsInCrate.remove(keyLoc);
-			registeredTokens.remove(keyLoc);
-		}
-		return true;
+
+		// need to remove all the placed tokens from this item
+		for (Token t : tdb.placedTokens)
+			tdb.item.remToken(t);
+
+		// remove the item token showing in the crate
+		tdb.item.remToken(tdb.locInCrateToken);
+
+		// finally remove the tdb entry from the database
+		return tokenDB.remove(tdb);
 	}
-	
+
 	public void setColor(Color color) {
 		this.color = color;
-		for (Token t: crateTokens)
-			t.setColor(color);
-		for (Location key : registeredTokens.keySet())
-			for (Token t : registeredTokens.get(key))
+		// need to go through every item token and change the border color
+
+		for (TokenDB tdb : tokenDB) {
+			tdb.locInCrateToken.setBorderColor(color);
+			for (Token t : tdb.placedTokens)
 				t.setBorderColor(color);
+		}
+		
+		// need to change all the crate Token colos also
+		for (Token t : crateTokens){
+			t.setColor(color);
+			t.setBorderColor(color);
+		}
 	}
 
-	public int getItemCount() {
-		return itemsInCrate.size();
+	public int getItemsInCrateCount() {
+		return tokenDB.size();
 	}
 
 	public List<Integer> contentsOnWhatPage() {
 		List<Integer> pages = new ArrayList<Integer>();
 
-		for (Location loc : itemsInCrate.keySet()) {
-			// get first item in the crate
-			Item i = itemsInCrate.get(loc);
-			// look through tokens to find the ones inside this crate
-			for (Token t : i.getTokens())
-				// if find a token in this crate, add it to the pages list
-				if (t.isInCrate(this))
-					pages.add(t.getLocation().getPage());
-		}
+		for (TokenDB tdb : tokenDB)
+			pages.add(tdb.locInCrateToken.getLocation().getPage());
 
 		List<Integer> uniquePages = new ArrayList<Integer>();
 		Collections.sort(pages);
@@ -131,32 +138,43 @@ public class Crate extends Entry implements Serializable {
 		return uniquePages;
 	}
 
-	public boolean contains(Entry itemEntry) {
-		boolean answer = false;
-		for (Location loc : itemsInCrate.keySet())
-			if (itemsInCrate.get(loc).sameAs(itemEntry))
-				answer = true;
-		return answer;
-	}
-
-	public Item getItem(Entry itemEntry) {
-		Item returnItem = null;
-		for (Location loc : itemsInCrate.keySet())
-			if (itemsInCrate.get(loc).sameAs(itemEntry))
-				returnItem = itemsInCrate.get(loc);
-		return returnItem;
-	}
-
 	public void addToken(Location loc) {
 		crateTokens.add(new Token(loc, getColor(), TokenLocations.ON_PAGE));
 		// add this token to every item in the crate
-		for (Location key : itemsInCrate.keySet()) {
-			Item i = itemsInCrate.get(key);
-			Token token = new Token(loc, this.color, TokenLocations.ON_PAGE, this);
+		for (TokenDB tdb : tokenDB) {
+			Token token = new Token(loc, tdb.item.getColor(), TokenLocations.ON_PAGE, this);
+			token.setBorderColor(color);
 			token.setVisible(false);
-			i.addToken(token);
-			registeredTokens.get(key).add(token);
+			tdb.item.addToken(token);
+			tdb.placedTokens.add(token);
 		}
+	}
+
+	public void remToken(Location loc) {
+		// first ensure the crate is at this location
+		Token remToken = null;
+		for (Token t : crateTokens)
+			if (t.isAtLocation(loc))
+				remToken = t;
+
+		// didn't find it
+		if (remToken == null)
+			return;
+
+		// since it exists, remove all placements from the database
+		// use remToken as location identifier, since this is the token we will
+		// remove
+		for (TokenDB tdb : tokenDB) {
+			Token pToken = null;
+			for (Token t : tdb.placedTokens)
+				if (t.isAtLocation(remToken.getLocation()))
+					pToken = t;
+			if (pToken != null)
+				tdb.placedTokens.remove(pToken);
+		}
+
+		// now remove the token from the crate
+		crateTokens.remove(remToken);
 	}
 
 	public List<Token> getTokensOnPage(int page) {
@@ -174,4 +192,52 @@ public class Crate extends Entry implements Serializable {
 		return count;
 	}
 
+	public boolean remItemInCrateAtLocation(Location testLocation, Item item) {
+		// find database entry for this item at this location
+		TokenDB tdbEntry = null;
+		for (TokenDB tdb : tokenDB) {
+			if (tdb.item.equals(item) && tdb.locInCrateToken.isAtLocation(testLocation))
+				tdbEntry = tdb;
+		}
+
+		if (tdbEntry == null)
+			return false;
+		else {
+			// need to remove all the placed tokens from this item
+			for (Token t : tdbEntry.placedTokens)
+				tdbEntry.item.remToken(t);
+
+			// remove the item token showing in the crate
+			tdbEntry.item.remToken(tdbEntry.locInCrateToken);
+
+			// finally remove the tdb entry from the database
+			return tokenDB.remove(tdbEntry);
+		}
+	}
+
+	public void removeItemInstancesFromCrate(Item item) {
+		// need to remove all tokenDB entries with this item in it
+		List<TokenDB> remList = new ArrayList<TokenDB>();
+		for (TokenDB tdb : tokenDB)
+			if (tdb.item.equals(item))
+				remList.add(tdb);
+
+		for (TokenDB tdb : remList)
+			tokenDB.remove(tdb);
+	}
+
+	public void clearCrate() {
+		// need to empty all tokens from the items
+		for (TokenDB tdb : tokenDB) {
+			// need to remove all the placed tokens from this item
+			for (Token t : tdb.placedTokens)
+				tdb.item.remToken(t);
+
+			// remove the item token showing in the crate
+			tdb.item.remToken(tdb.locInCrateToken);
+		}
+
+		// now empty the token database
+		tokenDB.clear();
+	}
 }

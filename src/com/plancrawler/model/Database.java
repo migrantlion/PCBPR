@@ -50,6 +50,7 @@ public class Database {
 	}
 	
 	public boolean remItem(Item item) {
+		warehouse.removeItemInstances(item);
 		return items.remove(item);
 	}
 	
@@ -66,7 +67,7 @@ public class Database {
 		if (i == null)
 			return false;
 		else
-			return i.remToken(loc);
+			return i.remVisibleToken(loc);
 	}
 	
 	public Item getItem(int index){
@@ -103,7 +104,7 @@ public class Database {
 			Item[] itemArray = (Item[]) ois.readObject();
 			Measurement[] mArray = (Measurement[]) ois.readObject();
 			associatedPDFName = (String) ois.readObject();
-			warehouse = (CrateDatabase) ois.readObject();
+			this.warehouse = (CrateDatabase) ois.readObject();
 			
 			items.clear();
 			items.addAll(Arrays.asList(itemArray));
@@ -199,6 +200,15 @@ public class Database {
 
 	public void addTokenToCrate(Location loc, int crateIndex) {
 		warehouse.addTokenToCrate(loc, crateIndex);
+	}
+
+	public void remItemFromCrate(Location loc, int itemIndex, int crateIndex) {
+		Item item = getItem(itemIndex);
+		warehouse.remItemFromCrate(loc, item, crateIndex);
+	}
+
+	public void remTokenFromCrate(Location loc, int crateIndex) {
+		warehouse.remTokenFromCrate(loc, crateIndex);
 	}
 	
 }

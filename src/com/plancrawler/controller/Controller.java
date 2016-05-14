@@ -157,25 +157,29 @@ public class Controller {
 	}
 
 	public void dropToken(MyPoint point) {
-		Location loc;
+		if (isMeasuring)
+			return;
+		
+		Location loc= new Location(getCurrentPage(), point);;
 		if (hasActiveItem() && hasActiveCrate()) {
 			// place item in crate
-			loc = new Location(getCurrentPage(), point);
 			db.addItemToCrate(loc, activeItemRow, activeCrateRow);
 		} else if (hasActiveCrate()) {
 			// place crate on page
-			loc = new Location(getCurrentPage(), point);
 			db.addTokenToCrate(loc, activeCrateRow);
 		} else if (hasActiveItem()) {
-			loc = new Location(getCurrentPage(), point);
 			db.addTokenToItem(loc, activeItemRow);
 		}
 	}
 
 	public void removeToken(MyPoint point) {
-		if (hasActiveItem()) {
-			Location loc = new Location(getCurrentPage(), point);
-			db.remTokenFromItem(loc, activeItemRow);
+		Location loc = new Location(getCurrentPage(), point);
+		if (hasActiveItem() && hasActiveCrate()){
+			db.remItemFromCrate(loc, activeItemRow, activeCrateRow);
+		} else if (hasActiveCrate()){
+			db.remTokenFromCrate(loc, activeCrateRow);
+		} else if (hasActiveItem()) {
+			db.remTokenFromItem(loc, activeItemRow); 
 		}
 	}
 
@@ -277,10 +281,17 @@ public class Controller {
 		return cratePanelActive;
 	}
 
-	public String getCrateName(int crateIndex) {
-		if (crateIndex < 0)
-			return "none";
+	public String getActiveCrateName() {
+		if (hasActiveCrate())
+			return db.getCrate(activeCrateRow).getName();
 		else
-			return db.getCrate(crateIndex).getName();
+			return null;
+	}
+	
+	public String getActiveItemName(){
+		if (hasActiveItem())
+			return db.getItem(activeItemRow).getName();
+		else
+			return null;
 	}
 }
