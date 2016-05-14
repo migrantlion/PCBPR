@@ -10,7 +10,8 @@ public class Crate extends Entry implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private List<Token> crateTokens = new ArrayList<Token>();
-	private class TokenDB {
+	private class TokenDB implements Serializable {
+		private static final long serialVersionUID = 1L;
 		Location index;
 		Item item;
 		List<Token> placedTokens = new ArrayList<Token>();

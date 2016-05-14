@@ -487,7 +487,7 @@ public class MainFrame extends JFrame {
 						controller.saveToFile(file);
 						refreshTables();
 					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(MainFrame.this, "Could save data to file.", "Error saving file",
+						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.", "Error saving file",
 								JOptionPane.ERROR_MESSAGE);
 					}
 				}
