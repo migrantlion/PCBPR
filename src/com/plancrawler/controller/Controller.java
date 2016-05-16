@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.plancrawler.controller.fileOps.DocumentHandler;
 import com.plancrawler.model.Crate;
 import com.plancrawler.model.Database;
-import com.plancrawler.model.DocumentHandler;
 import com.plancrawler.model.Item;
 import com.plancrawler.model.Location;
 import com.plancrawler.model.Measurement;
@@ -40,6 +40,10 @@ public class Controller {
 		}
 		db.setAssociatedPDFName(pdfDoc.getCurrentFile());
 		return pdfDoc.getCurrentFile();
+	}
+	
+	public void cleanup(){
+		pdfDoc.cleanUp();
 	}
 
 	public List<Item> getItems() {

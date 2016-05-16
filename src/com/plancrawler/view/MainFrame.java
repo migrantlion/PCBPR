@@ -12,6 +12,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
@@ -107,6 +109,12 @@ public class MainFrame extends JFrame {
 		setLocationRelativeTo(null);
 		setJMenuBar(new PCMenuBar());
 		setVisible(true);
+		this.addWindowListener(new WindowAdapter(){
+			@Override
+			public void windowClosing(WindowEvent e) {
+				controller.cleanup();
+			}
+		});
 	}
 
 	private void addComponents() {
@@ -494,6 +502,15 @@ public class MainFrame extends JFrame {
 			});
 		}
 	}
+	
+	private void exitProgram(){
+		int action = JOptionPane.showConfirmDialog(MainFrame.this,
+				"Are you sure you want to exit the application?", "Confirm exit", JOptionPane.OK_CANCEL_OPTION);
+		if (action == JOptionPane.OK_OPTION) {
+			controller.cleanup();
+			System.exit(0);
+		}
+	}
 
 	private class PCMenuBar extends JMenuBar {
 		private static final long serialVersionUID = 1L;
@@ -534,12 +551,7 @@ public class MainFrame extends JFrame {
 			exitMenuItem.setMnemonic(KeyEvent.VK_X);
 			exitMenuItem.setAccelerator(
 					KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK));
-			exitMenuItem.addActionListener((e) -> {
-				int action = JOptionPane.showConfirmDialog(MainFrame.this,
-						"Are you sure you want to exit the application?", "Confirm exit", JOptionPane.OK_CANCEL_OPTION);
-				if (action == JOptionPane.OK_OPTION)
-					System.exit(0);
-			});
+			exitMenuItem.addActionListener((e) -> exitProgram());
 
 			fileMenu.add(loadPDFMenuItem);
 			fileMenu.add(loadTOMenuItem);

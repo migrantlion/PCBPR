@@ -23,6 +23,8 @@ public class TokenPainter implements Paintable {
 		if (token.isVisible()) {
 			Graphics2D g2 = (Graphics2D) g;
 
+			int borderWidth = (int) (10 * scale);
+
 			Location loc = token.getLocation();
 			MyPoint pt = loc.getPoint();
 			pt.scale(scale);
@@ -40,10 +42,13 @@ public class TokenPainter implements Paintable {
 
 			// add border color
 			g2.setColor(token.getBorderColor());
-			if (token.isInCrate())
-				g2.drawRect((int) pt.getX(), (int) pt.getY(), diameter, diameter);
-			else
-				g2.drawOval((int) pt.getX(), (int) pt.getY(), diameter, diameter);
+			if (token.isInCrate()) { 
+				for (int n = 0; n < borderWidth; n++)
+					g2.drawRect((int) (pt.getX() + n), (int) (pt.getY() + n), diameter - 2 * n, diameter - 2 * n);
+			}
+			// else
+			// g2.drawOval((int) pt.getX(), (int) pt.getY(), diameter,
+			// diameter);
 		}
 	}
 

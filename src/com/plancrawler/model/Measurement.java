@@ -2,6 +2,7 @@ package com.plancrawler.model;
 
 import java.io.Serializable;
 
+import com.plancrawler.controller.fileOps.DocumentHandler;
 import com.plancrawler.model.utilities.MyPoint;
 
 public class Measurement implements Serializable {

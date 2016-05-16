@@ -1,4 +1,4 @@
-package com.plancrawler.model;
+package com.plancrawler.controller.fileOps;
 
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
@@ -21,6 +21,7 @@ public class DocumentHandler implements Serializable {
 	public static final int DPI = 300;
 	private HashMap<Integer, Double> pageRotations;
 	private HashMap<Integer, Double> pageCalibration;
+	private TempImageBuffer tib;
 
 	public DocumentHandler() {
 		this.numPages = 0;
@@ -28,6 +29,7 @@ public class DocumentHandler implements Serializable {
 		this.pageRotations = new HashMap<Integer, Double>();
 		this.pageCalibration = new HashMap<Integer, Double>();
 		this.currentFile = null;
+		this.tib = TempImageBuffer.getInstance();
 	}
 
 	public void registerCalibration(double scale) {
@@ -59,17 +61,8 @@ public class DocumentHandler implements Serializable {
 				pageNum = 0;
 			currentPage = pageNum;
 		
-			try (PDDocument document = PDDocument.load(new File(currentFile))) {
-				PDFRenderer pdfRenderer = new PDFRenderer(document);
-
-				image = pdfRenderer.renderImageWithDPI(currentPage, DPI);
-				image = rotateImage(image);
-
-				document.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
+			image = tib.getImageFromBuffer(currentPage);
+			image = rotateImage(image);
 		}
 		return image;
 	}
@@ -146,6 +139,11 @@ public class DocumentHandler implements Serializable {
 		currentPage = 0;
 		pageCalibration.clear();
 		pageRotations.clear();
+		tib.clearBuffer();
+	}
+	
+	public void clearBuffer(){
+		tib.clearBuffer();
 	}
 
 	public void setDocProperties() {
@@ -158,6 +156,7 @@ public class DocumentHandler implements Serializable {
 			pageRotations.clear();
 
 			document.close();
+			tib.startBuffer(currentFile, numPages);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -196,6 +195,12 @@ public class DocumentHandler implements Serializable {
 
 	public String getCurrentPath() {
 		return path;
+	}
+
+	public void cleanUp() {
+		if (currentFile != null){
+			tib.stopBuffer();
+		}
 	}
 
 }
