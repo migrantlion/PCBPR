@@ -64,10 +64,11 @@ public class MeasurePainter extends Measurement implements Paintable {
 		
 		// find the center of the line and adjust back by the text width
 		MyPoint centerPt = MyPoint.middle(loc1, loc2);
-		centerPt.add(new MyPoint(-textSize.getWidth()/2d,0));
+		centerPt.translate(new MyPoint(-textSize.getWidth()/2d,0));
 		
 		// draw in a background box
-		g2.setColor(Color.white);
+		Color background = new Color(255, 255, 255, 100);
+		g2.setColor(background);
 		g2.fillRect((int) centerPt.getX(), (int) (centerPt.getY() - textSize.getHeight()), (int)textSize.getWidth(), (int)textSize.getHeight());
 		
 		g2.setColor(drawColor);

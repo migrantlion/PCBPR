@@ -27,10 +27,9 @@ public class MyPoint implements Serializable {
 		return new MyPoint(this.x + other.x, this.y + other.y);
 	}
 
-	public MyPoint translate(MyPoint other) {
+	public void translate(MyPoint other) {
 		this.x += other.getX();
 		this.y += other.getY();
-		return this;
 	}
 
 	public void scale(double scalar) {

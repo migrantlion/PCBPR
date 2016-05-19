@@ -21,12 +21,10 @@ public class TempImageBuffer {
 	private List<String> usedNames = new ArrayList<String>();
 
 	private class TFileDB {
-		String filename;
 		File file;
 		boolean alreadyWritten = false;
 
 		public TFileDB(String filename) {
-			this.filename = filename;
 			this.file = new File(filename);
 			alreadyWritten = false;
 		}
@@ -35,7 +33,6 @@ public class TempImageBuffer {
 	private TFileDB[] tfdb;
 
 	private TempImageBuffer() {
-		cleanUp();
 	}
 
 	public static TempImageBuffer getInstance() {

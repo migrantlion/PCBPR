@@ -41,7 +41,8 @@ public class Entry implements Serializable, Comparable<Entry> {
 	
 	@Override
 	public int compareTo(Entry other) {
-		if (this.category == other.category)
+		//TODO: ensure this is a robust sorting methodology for the entries
+		if (this.category.equals(other.category))
 			return this.name.compareTo(other.name);
 		else
 			return this.category.compareTo(other.category);

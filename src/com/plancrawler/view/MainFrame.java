@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -44,6 +45,7 @@ import com.plancrawler.controller.Paintable;
 import com.plancrawler.model.utilities.MyPoint;
 import com.plancrawler.view.dialogs.EntryModifyDialog;
 import com.plancrawler.view.support.EntryFormEvent;
+import com.plancrawler.view.support.PrefsListener;
 import com.plancrawler.view.toolbars.FocusToolbar;
 import com.plancrawler.view.toolbars.MeasureToolbar;
 import com.plancrawler.view.toolbars.NavToolbar;
@@ -54,7 +56,7 @@ import com.plancrawler.view.toolbars.SelectionNotifierToolbar;
 public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	// Toolbars
 	private SaveLoadToolbar fileToolbar;
 	private NavToolbar navToolbar;
@@ -75,6 +77,10 @@ public class MainFrame extends JFrame {
 	// Panels
 	private JPanel westPanel;
 	private JPanel eastPanel;
+	
+	// Dialogs
+	private PrefsDialog prefsDialog;
+	private Preferences prefs;
 
 	private Controller controller = new Controller();
 
@@ -87,7 +93,8 @@ public class MainFrame extends JFrame {
 		spiders.add(createIcon("/com/plancrawler/view/iconImages/Spider16.gif").getImage());
 		this.setIconImages(spiders);
 		
-		setup();
+		setupFrame();
+		setPrefs();
 		addComponents();
 	}
 	
@@ -100,7 +107,7 @@ public class MainFrame extends JFrame {
 		return icon;
 	}
 	
-	private void setup() {
+	private void setupFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -117,7 +124,25 @@ public class MainFrame extends JFrame {
 		});
 	}
 
-	private void addComponents() {
+	private void setPrefs() {
+//		prefs = Preferences.userRoot().node("pcbpr");
+		prefs = Preferences.userNodeForPackage(this.getClass());
+		prefsDialog = new PrefsDialog(this);
+		prefsDialog.addPrefsListener(new PrefsListener(){
+			@Override
+			public void preferencesSet(String pdfPath, String tempPath) {
+				controller.setPaths(pdfPath, tempPath);
+				prefs.put("pdfPath", pdfPath);
+				prefs.put("tempPath", tempPath);
+			}
+		});
+		String docPath = prefs.get("pdfPath", System.getProperty("user.home"));
+		String tempPath = prefs.get("tempPath", System.getProperty("user.home"));
+		controller.setPaths(docPath, tempPath);
+		prefsDialog.setDefaults(docPath, tempPath);
+	}
+	
+	private void addComponents(){
 		addToolbarComponents();
 		addWestComponents();
 		addEastComponents();
@@ -169,6 +194,8 @@ public class MainFrame extends JFrame {
 		measToolbar = new MeasureToolbar(pdfViewPanel);
 		measToolbar.addMeasurementListener((m) -> {
 			controller.setMeasuring(m.isMeasurementActive());
+			if (m.isMeasurementActive())
+				refreshTables(); // clears selections
 			if (m.isAddMeasurementRequest())
 				controller.addMeasurement(m.getMeas());
 			if (m.isDrawRequest())
@@ -628,6 +655,13 @@ public class MainFrame extends JFrame {
 			showPaneMenu.add(addEastWindow);
 
 			windowMenu.add(showPaneMenu);
+			windowMenu.addSeparator();
+			
+			JMenuItem prefsMenu = new JMenuItem("Preferenes");
+			prefsMenu.addActionListener((e) ->{
+				prefsDialog.setVisible(true);
+			});
+			windowMenu.add(prefsMenu);
 
 			this.add(windowMenu);
 		}
@@ -637,6 +671,10 @@ public class MainFrame extends JFrame {
 			editMenu.setMnemonic(KeyEvent.VK_E);
 
 			JMenuItem clearAllMenuItem = new JMenuItem("Clear takeOff");
+			clearAllMenuItem.addActionListener((e)->{
+				controller.clearDatabase();
+				refreshTables();
+			});
 			editMenu.add(clearAllMenuItem);
 			this.add(editMenu);
 		}
@@ -669,7 +707,7 @@ public class MainFrame extends JFrame {
 			if (e.getSource() == pdfViewPanel && !controller.isMeasuring()) {
 				MyPoint point = pdfViewPanel.getImageRelativePoint(new MyPoint(e.getX(), e.getY()));
 				if (e.getButton() == MouseEvent.BUTTON1) {
-					if (controller.hasActive()) {
+					if (controller.hasActive() && !controller.isMeasuring()) {
 						controller.dropToken(point);
 						updateMarks();
 					}
@@ -677,10 +715,13 @@ public class MainFrame extends JFrame {
 					if (controller.hasActive()) {
 						controller.removeToken(point);
 						updateMarks();
-					} else {
-						controller.removeMeasurement(point);
-						updateMarks();
+//					} else {
+//						controller.removeMeasurement(point);
+//						updateMarks();
+//					}
 					}
+					controller.removeMeasurement(point);
+					updateMarks();
 				}
 			}
 		}

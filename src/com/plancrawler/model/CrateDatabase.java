@@ -115,4 +115,8 @@ public class CrateDatabase implements Serializable {
 		for (Crate crate : crates)
 			crate.removeItemInstancesFromCrate(item);
 	}
+
+	public void clearAll() {
+		crates.clear();
+	}
 }

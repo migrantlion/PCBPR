@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.text.Document;
+
 import com.plancrawler.controller.fileOps.DocumentHandler;
 import com.plancrawler.model.Crate;
 import com.plancrawler.model.Database;
@@ -190,6 +192,10 @@ public class Controller {
 	public void clearTables() {
 		db.wipeTokens();
 	}
+	
+	public void clearDatabase(){
+		db.clearAll();
+	}
 
 	public String getAssociatedPDFName() {
 		return db.getAssociatedPDFName();
@@ -297,5 +303,9 @@ public class Controller {
 			return db.getItem(activeItemRow).getName();
 		else
 			return null;
+	}
+
+	public void setPaths(String pdfPath, String tempPath) {
+		pdfDoc.setPaths(pdfPath, tempPath);
 	}
 }

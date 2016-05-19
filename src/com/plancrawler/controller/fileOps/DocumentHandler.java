@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
 
 public class DocumentHandler implements Serializable {
 
@@ -21,7 +20,7 @@ public class DocumentHandler implements Serializable {
 	public static final int DPI = 300;
 	private HashMap<Integer, Double> pageRotations;
 	private HashMap<Integer, Double> pageCalibration;
-	private TempImageBuffer tib;
+	private transient TempImageBuffer tib;
 
 	public DocumentHandler() {
 		this.numPages = 0;
@@ -201,6 +200,11 @@ public class DocumentHandler implements Serializable {
 		if (currentFile != null){
 			tib.stopBuffer();
 		}
+	}
+
+	public void setPaths(String pdfPath, String tempPath) {
+		this.path = pdfPath;
+		tib.setPath(tempPath);
 	}
 
 }

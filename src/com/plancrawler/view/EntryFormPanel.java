@@ -57,7 +57,7 @@ public class EntryFormPanel extends JPanel {
 	}
 
 	private void attachComponents() {
-		nameLabel = new JLabel("item name:");
+		nameLabel = new JLabel("entry name:");
 		descLabel = new JLabel("description:");
 		catLabel = new JLabel("category:");
 		nameField = new JTextField(10);

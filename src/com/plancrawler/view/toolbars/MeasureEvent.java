@@ -16,6 +16,7 @@ public class MeasureEvent extends EventObject {
 		super(obj);
 		this.meas = meas;
 		this.drawRequest = drawRequest;
+		this.measurementActive = measurementActive;
 		this.addMeasurementRequest = addMeasurementRequest;
 	}
 

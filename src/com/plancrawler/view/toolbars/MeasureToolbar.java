@@ -59,6 +59,8 @@ public class MeasureToolbar extends JToolBar {
 			if (measButt.getBackground() == noColor) {
 				measButt.setBackground(selectedColor);
 				isMeasuring = true;
+				MeasureEvent measEvent = new MeasureEvent(MeasureToolbar.this, null, isMeasuring, false, false);
+				alertListeners(measEvent);
 			} else
 				resetButtons();
 		});
@@ -170,6 +172,8 @@ public class MeasureToolbar extends JToolBar {
 			activeScale = 1;
 			isCalibrating = true;
 			isMeasuring = true;
+			MeasureEvent measEvent = new MeasureEvent(MeasureToolbar.this, null, isMeasuring, false, false);
+			alertListeners(measEvent);
 			break;
 		}
 	}

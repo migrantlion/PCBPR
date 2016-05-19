@@ -210,6 +210,12 @@ public class Database {
 	public void remTokenFromCrate(Location loc, int crateIndex) {
 		warehouse.remTokenFromCrate(loc, crateIndex);
 	}
+
+	public void clearAll() {
+		measurements.clear();
+		items.clear();
+		warehouse.clearAll();
+	}
 	
 }
 
