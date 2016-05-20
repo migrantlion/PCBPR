@@ -10,6 +10,7 @@ import java.util.List;
 import javax.swing.text.Document;
 
 import com.plancrawler.controller.fileOps.DocumentHandler;
+import com.plancrawler.controller.fileOps.TableExporter;
 import com.plancrawler.model.Crate;
 import com.plancrawler.model.Database;
 import com.plancrawler.model.Item;
@@ -18,6 +19,7 @@ import com.plancrawler.model.Measurement;
 import com.plancrawler.model.Token;
 import com.plancrawler.model.utilities.MyPoint;
 import com.plancrawler.view.support.EntryFormEvent;
+import com.plancrawler.view.support.ItemTableModel;
 import com.plancrawler.view.toolbars.RotToolbarEvent;
 
 public class Controller {
@@ -307,5 +309,10 @@ public class Controller {
 
 	public void setPaths(String pdfPath, String tempPath) {
 		pdfDoc.setPaths(pdfPath, tempPath);
+	}
+
+	public void saveTableAsCSV(ItemTableModel tableModel, File file) {
+		TableExporter.saveTableAsCSV(tableModel, file);
+		
 	}
 }

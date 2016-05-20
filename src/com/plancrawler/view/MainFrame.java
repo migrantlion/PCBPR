@@ -45,6 +45,7 @@ import com.plancrawler.controller.Paintable;
 import com.plancrawler.model.utilities.MyPoint;
 import com.plancrawler.view.dialogs.EntryModifyDialog;
 import com.plancrawler.view.support.EntryFormEvent;
+import com.plancrawler.view.support.ItemTableModel;
 import com.plancrawler.view.support.PrefsListener;
 import com.plancrawler.view.toolbars.FocusToolbar;
 import com.plancrawler.view.toolbars.MeasureToolbar;
@@ -125,7 +126,8 @@ public class MainFrame extends JFrame {
 	}
 
 	private void setPrefs() {
-//		prefs = Preferences.userRoot().node("pcbpr");
+		// note this throws a root warning, even though root access is not asked for.  
+		// no harm, but warning is annoying.  considered a "feature" by the JVM.
 		prefs = Preferences.userNodeForPackage(this.getClass());
 		prefsDialog = new PrefsDialog(this);
 		prefsDialog.addPrefsListener(new PrefsListener(){
@@ -488,8 +490,8 @@ public class MainFrame extends JFrame {
 				protected BufferedImage doInBackground() throws Exception {
 					BufferedImage image = null;
 					try {
-						controller.loadFromFile(fileChooser.getSelectedFile());
 						navToolbar.showProgress();
+						controller.loadFromFile(fileChooser.getSelectedFile());
 						image = controller.getCurrentPageImage();
 					} catch (Exception e1) {
 						JOptionPane.showMessageDialog(MainFrame.this, "Could not load data from file.",
@@ -521,6 +523,35 @@ public class MainFrame extends JFrame {
 							file = fileChooser.getSelectedFile();
 						controller.saveToFile(file);
 						refreshTables();
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.", "Error saving file",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			});
+		}
+	}
+	
+	private void exportToCSV() {
+		JFileChooser fileChooser = new JFileChooser();
+
+		fileChooser.setCurrentDirectory(controller.getCurrentPDFDirectory());
+		fileChooser.resetChoosableFileFilters();
+		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("CSV", "csv"));
+		fileChooser.setAcceptAllFileFilterUsed(true);
+		if (fileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						File file;
+						if (!fileChooser.getSelectedFile().getAbsolutePath().endsWith(".csv"))
+							file = new File(fileChooser.getSelectedFile().getAbsolutePath()+".csv");
+						else
+							file = fileChooser.getSelectedFile();
+						ItemTableModel tableModel = new ItemTableModel();
+						tableModel.setData(controller.getItems());
+						controller.saveTableAsCSV(tableModel, file);
 					} catch (Exception e1) {
 						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.", "Error saving file",
 								JOptionPane.ERROR_MESSAGE);
@@ -570,7 +601,8 @@ public class MainFrame extends JFrame {
 			JMenuItem saveMenuItem = new JMenuItem("Save TakeOff");
 			saveMenuItem.addActionListener((e) -> saveTO());
 
-			JMenuItem exportImages = new JMenuItem("Export Images");
+			JMenuItem exportTO = new JMenuItem("Export TakeOff to CSV");
+			exportTO.addActionListener((e)->exportToCSV());
 
 			JMenuItem exportPDF = new JMenuItem("Export PDF");
 
@@ -584,8 +616,9 @@ public class MainFrame extends JFrame {
 			fileMenu.add(loadTOMenuItem);
 			fileMenu.addSeparator();
 			fileMenu.add(saveMenuItem);
+			fileMenu.addSeparator();
 			fileMenu.add(exportPDF);
-			fileMenu.add(exportImages);
+			fileMenu.add(exportTO);
 			fileMenu.addSeparator();
 			fileMenu.add(exitMenuItem);
 			this.add(fileMenu);
