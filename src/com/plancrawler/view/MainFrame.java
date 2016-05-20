@@ -57,7 +57,10 @@ import com.plancrawler.view.toolbars.SelectionNotifierToolbar;
 public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	
+
+	// Menu
+	private PCMenuBar pcMenubar = new PCMenuBar();
+
 	// Toolbars
 	private SaveLoadToolbar fileToolbar;
 	private NavToolbar navToolbar;
@@ -74,31 +77,32 @@ public class MainFrame extends JFrame {
 	private PDFViewPane pdfViewPanel = new PDFViewPane();
 	private ItemSelectionPanel itemSelectPanel = new ItemSelectionPanel();
 	private CrateSelectionPanel crateSelectPanel = new CrateSelectionPanel();
-	
+
 	// Panels
 	private JPanel westPanel;
 	private JPanel eastPanel;
-	
+
 	// Dialogs
 	private PrefsDialog prefsDialog;
 	private Preferences prefs;
 
 	private Controller controller = new Controller();
+	private final static String PCBPR_TITLE = "PlanCrawler Blueprint Reader";
 
 	public MainFrame() {
-		super("PlanCrawler BluePrint Reader");
+		super(PCBPR_TITLE);
 
 		List<Image> spiders = new ArrayList<Image>();
 		spiders.add(createIcon("/com/plancrawler/view/iconImages/Spider8.gif").getImage());
 		spiders.add(createIcon("/com/plancrawler/view/iconImages/Spider10.gif").getImage());
 		spiders.add(createIcon("/com/plancrawler/view/iconImages/Spider16.gif").getImage());
 		this.setIconImages(spiders);
-		
+
 		setupFrame();
 		setPrefs();
 		addComponents();
 	}
-	
+
 	private ImageIcon createIcon(String string) {
 		URL url = getClass().getResource(string);
 		if (url == null)
@@ -107,7 +111,7 @@ public class MainFrame extends JFrame {
 		ImageIcon icon = new ImageIcon(url);
 		return icon;
 	}
-	
+
 	private void setupFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
@@ -115,9 +119,9 @@ public class MainFrame extends JFrame {
 		setSize(screenDim.width - 100, screenDim.height - 100);
 		setMinimumSize(new Dimension(640, 480));
 		setLocationRelativeTo(null);
-		setJMenuBar(new PCMenuBar());
+		setJMenuBar(pcMenubar);
 		setVisible(true);
-		this.addWindowListener(new WindowAdapter(){
+		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				controller.cleanup();
@@ -126,11 +130,12 @@ public class MainFrame extends JFrame {
 	}
 
 	private void setPrefs() {
-		// note this throws a root warning, even though root access is not asked for.  
-		// no harm, but warning is annoying.  considered a "feature" by the JVM.
+		// note this throws a root warning, even though root access is not asked
+		// for.
+		// no harm, but warning is annoying. considered a "feature" by the JVM.
 		prefs = Preferences.userNodeForPackage(this.getClass());
 		prefsDialog = new PrefsDialog(this);
-		prefsDialog.addPrefsListener(new PrefsListener(){
+		prefsDialog.addPrefsListener(new PrefsListener() {
 			@Override
 			public void preferencesSet(String pdfPath, String tempPath) {
 				controller.setPaths(pdfPath, tempPath);
@@ -143,8 +148,8 @@ public class MainFrame extends JFrame {
 		controller.setPaths(docPath, tempPath);
 		prefsDialog.setDefaults(docPath, tempPath);
 	}
-	
-	private void addComponents(){
+
+	private void addComponents() {
 		addToolbarComponents();
 		addWestComponents();
 		addEastComponents();
@@ -162,8 +167,12 @@ public class MainFrame extends JFrame {
 				loadPDF();
 			if (e.isLoadRequest())
 				loadTO();
-			if (e.isSaveRequest())
-				saveTO();
+			if (e.isSaveRequest()) {
+				if (pcMenubar.isSaveFileSet())
+					reSaveTO(pcMenubar.getSaveFile());
+				else
+					saveTO();
+			}
 		});
 		toolPanel.add(fileToolbar);
 
@@ -204,7 +213,7 @@ public class MainFrame extends JFrame {
 				requestDraw(m.getMeas());
 		});
 		toolPanel.add(measToolbar);
-		
+
 		selNotifyToolbar = new SelectionNotifierToolbar();
 		toolPanel.add(selNotifyToolbar);
 
@@ -231,52 +240,54 @@ public class MainFrame extends JFrame {
 
 		tablePanel.setData(controller.getItems());
 
-//		cratePanel.setData(controller.getCrates());
-//		cratePanel.addTableListener((t)->{
-//			controller.setCratePanelActive(t.getRow());
-//			itemsInCratePanel.setTitle("Items in Crate:  "+controller.getActiveCrateName());
-//			itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
-//			itemsInCratePanel.refresh();
-//		});
-//		
-//		itemsInCratePanel.setData(controller.getItemsInCrate(-1));
-//
-//		JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, cratePanel, itemsInCratePanel);
-//		splitPanel.setDividerLocation(0.5);
-//		splitPanel.setOneTouchExpandable(true);
+		// cratePanel.setData(controller.getCrates());
+		// cratePanel.addTableListener((t)->{
+		// controller.setCratePanelActive(t.getRow());
+		// itemsInCratePanel.setTitle("Items in Crate:
+		// "+controller.getActiveCrateName());
+		// itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive()));
+		// itemsInCratePanel.refresh();
+		// });
+		//
+		// itemsInCratePanel.setData(controller.getItemsInCrate(-1));
+		//
+		// JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+		// cratePanel, itemsInCratePanel);
+		// splitPanel.setDividerLocation(0.5);
+		// splitPanel.setOneTouchExpandable(true);
 
 		centerTabPane.addTab("PDF View", pdfViewPanel);
 		centerTabPane.addTab("Take-Off View", tablePanel);
-//		centerTabPane.addTab("Crate View", splitPanel);
+		// centerTabPane.addTab("Crate View", splitPanel);
 
 		this.add(centerTabPane, BorderLayout.CENTER);
 	}
 
-	private void addEastComponents(){
+	private void addEastComponents() {
 		eastPanel = new JPanel();
-//		Dimension dim = eastPanel.getPreferredSize();
-//		dim.width = 450;
-//		eastPanel.setPreferredSize(dim);
-		eastPanel.setLayout(new GridLayout(0,1));
-		
+		// Dimension dim = eastPanel.getPreferredSize();
+		// dim.width = 450;
+		// eastPanel.setPreferredSize(dim);
+		eastPanel.setLayout(new GridLayout(0, 1));
+
 		cratePanel.setData(controller.getCrates());
-		cratePanel.addTableListener((t)->{
+		cratePanel.addTableListener((t) -> {
 			controller.setCratePanelActive(t.getRow());
-			itemsInCratePanel.setTitle("Items in Crate:  "+controller.getActiveCrateName());
-			itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
+			itemsInCratePanel.setTitle("Items in Crate:  " + controller.getActiveCrateName());
+			itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive()));
 			itemsInCratePanel.refresh();
 		});
-	
+
 		itemsInCratePanel.setData(controller.getItemsInCrate(-1));
-	
+
 		JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, cratePanel, itemsInCratePanel);
 		splitPanel.setDividerLocation(0.5);
 		splitPanel.setOneTouchExpandable(true);
-		
+
 		eastPanel.add(splitPanel);
 		this.add(eastPanel, BorderLayout.EAST);
 	}
-	
+
 	private void addWestComponents() {
 		westPanel = new JPanel();
 		westPanel.setLayout(new GridLayout(0, 1));
@@ -342,17 +353,17 @@ public class MainFrame extends JFrame {
 		this.add(westPanel, BorderLayout.WEST);
 
 	}
-	
-	private void setSelNotifyToolbar(){
+
+	private void setSelNotifyToolbar() {
 		selNotifyToolbar.changeTitle(controller.getActiveItemName(), controller.getActiveCrateName());
 	}
-	
-	private void resetTableData(){
+
+	private void resetTableData() {
 		controller.setActiveCrateRow(-1);
 		controller.setActiveItemRow(-1);
 		controller.setCratePanelActive(-1);
 		setSelNotifyToolbar();
-		
+
 		itemSelectPanel.setData(controller.getItems());
 		crateSelectPanel.setData(controller.getCrates());
 		tablePanel.setData(controller.getItems());
@@ -365,13 +376,13 @@ public class MainFrame extends JFrame {
 		controller.setActiveItemRow(-1);
 		controller.setCratePanelActive(-1);
 		setSelNotifyToolbar();
-		
+
 		tablePanel.refresh();
 		itemSelectPanel.refresh();
 		crateSelectPanel.refresh();
 		cratePanel.refresh();
-		itemsInCratePanel.setTitle("Items in Crate:  "+controller.getActiveCrateName());
-		itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive())); 
+		itemsInCratePanel.setTitle("Items in Crate:  " + controller.getActiveCrateName());
+		itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive()));
 		itemsInCratePanel.refresh();
 		// if tables are updated, then Marks probably need to be as well
 		updateMarks();
@@ -439,6 +450,7 @@ public class MainFrame extends JFrame {
 						navToolbar.setCurrPage(0);
 						navToolbar.setLastPage(controller.getNumPages());
 						navToolbar.doneProgress();
+						setTitlebar(fileChooser.getSelectedFile().getAbsolutePath());
 						updateMarks();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -457,6 +469,13 @@ public class MainFrame extends JFrame {
 			};
 			worker.execute();
 		}
+	}
+	
+	private void setTitlebar(String pathName) {
+		if (pathName == null)
+			this.setTitle(PCBPR_TITLE);
+		else
+			this.setTitle(PCBPR_TITLE + ":   "+pathName);
 	}
 
 	private void loadTO() {
@@ -479,6 +498,8 @@ public class MainFrame extends JFrame {
 						navToolbar.setCurrPage(0);
 						navToolbar.setLastPage(controller.getNumPages());
 						navToolbar.doneProgress();
+						pcMenubar.setSaveFileName(fileChooser.getSelectedFile().getAbsolutePath());
+						setTitlebar(fileChooser.getSelectedFile().getAbsolutePath());
 						resetTableData();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -518,20 +539,39 @@ public class MainFrame extends JFrame {
 					try {
 						File file;
 						if (!fileChooser.getSelectedFile().getAbsolutePath().endsWith(".pto"))
-							file = new File(fileChooser.getSelectedFile().getAbsolutePath()+".pto");
+							file = new File(fileChooser.getSelectedFile().getAbsolutePath() + ".pto");
 						else
 							file = fileChooser.getSelectedFile();
 						controller.saveToFile(file);
+						pcMenubar.setSaveFileName(file.getAbsolutePath());
+						setTitlebar(file.getAbsolutePath());
 						refreshTables();
 					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.", "Error saving file",
-								JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.",
+								"Error saving file", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			});
 		}
 	}
+
 	
+	private void reSaveTO(String saveName) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					File file = new File(saveName);
+					controller.saveToFile(file);
+					refreshTables();
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.", "Error saving file",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+	}
+
 	private void exportToCSV() {
 		JFileChooser fileChooser = new JFileChooser();
 
@@ -546,24 +586,24 @@ public class MainFrame extends JFrame {
 					try {
 						File file;
 						if (!fileChooser.getSelectedFile().getAbsolutePath().endsWith(".csv"))
-							file = new File(fileChooser.getSelectedFile().getAbsolutePath()+".csv");
+							file = new File(fileChooser.getSelectedFile().getAbsolutePath() + ".csv");
 						else
 							file = fileChooser.getSelectedFile();
 						ItemTableModel tableModel = new ItemTableModel();
 						tableModel.setData(controller.getItems());
 						controller.saveTableAsCSV(tableModel, file);
 					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.", "Error saving file",
-								JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.",
+								"Error saving file", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			});
 		}
 	}
-	
-	private void exitProgram(){
-		int action = JOptionPane.showConfirmDialog(MainFrame.this,
-				"Are you sure you want to exit the application?", "Confirm exit", JOptionPane.OK_CANCEL_OPTION);
+
+	private void exitProgram() {
+		int action = JOptionPane.showConfirmDialog(MainFrame.this, "Are you sure you want to exit the application?",
+				"Confirm exit", JOptionPane.OK_CANCEL_OPTION);
 		if (action == JOptionPane.OK_OPTION) {
 			controller.cleanup();
 			System.exit(0);
@@ -572,13 +612,16 @@ public class MainFrame extends JFrame {
 
 	private class PCMenuBar extends JMenuBar {
 		private static final long serialVersionUID = 1L;
-		JFileChooser fileChooser = new JFileChooser();
+		private String saveFileName;
+		private JMenuItem reSaveMenuItem = new JMenuItem();
 
 		public PCMenuBar() {
 			setupMenu();
-			fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF files (.pdf)", "pdf"));
-			fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PlanCrawler TakeOff files (.pto)", "pto"));
-			fileChooser.setAcceptAllFileFilterUsed(true);
+			saveFileName = null;
+		}
+
+		public String getSaveFile() {
+			return saveFileName;
 		}
 
 		private void setupMenu() {
@@ -586,6 +629,21 @@ public class MainFrame extends JFrame {
 			makeWindowMenu();
 			makeEditMenu();
 			makeAboutMenu();
+		}
+
+		public boolean isSaveFileSet(){
+			return (saveFileName != null);
+		}
+		
+		public void setSaveFileName(String filename) {
+			if (filename == null) {
+				reSaveMenuItem.setVisible(false);
+				saveFileName = null;
+			} else {
+				saveFileName = filename;
+				reSaveMenuItem.setText("Save to " + filename);
+				reSaveMenuItem.setVisible(true);
+			}
 		}
 
 		private void makeFileMenu() {
@@ -601,8 +659,17 @@ public class MainFrame extends JFrame {
 			JMenuItem saveMenuItem = new JMenuItem("Save TakeOff");
 			saveMenuItem.addActionListener((e) -> saveTO());
 
+			reSaveMenuItem.addActionListener((e) -> {
+				if (saveFileName == null)
+					saveTO();
+				else
+					reSaveTO(saveFileName);
+			});
+			reSaveMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+			
+
 			JMenuItem exportTO = new JMenuItem("Export TakeOff to CSV");
-			exportTO.addActionListener((e)->exportToCSV());
+			exportTO.addActionListener((e) -> exportToCSV());
 
 			JMenuItem exportPDF = new JMenuItem("Export PDF");
 
@@ -616,6 +683,7 @@ public class MainFrame extends JFrame {
 			fileMenu.add(loadTOMenuItem);
 			fileMenu.addSeparator();
 			fileMenu.add(saveMenuItem);
+			fileMenu.add(reSaveMenuItem);
 			fileMenu.addSeparator();
 			fileMenu.add(exportPDF);
 			fileMenu.add(exportTO);
@@ -678,7 +746,7 @@ public class MainFrame extends JFrame {
 				westPanel.setVisible(menuItem.isSelected());
 			});
 			showPaneMenu.add(addWestWindow);
-			
+
 			JCheckBoxMenuItem addEastWindow = new JCheckBoxMenuItem("East Panel");
 			addEastWindow.setSelected(true);
 			addEastWindow.addActionListener((e) -> {
@@ -689,9 +757,9 @@ public class MainFrame extends JFrame {
 
 			windowMenu.add(showPaneMenu);
 			windowMenu.addSeparator();
-			
+
 			JMenuItem prefsMenu = new JMenuItem("Preferenes");
-			prefsMenu.addActionListener((e) ->{
+			prefsMenu.addActionListener((e) -> {
 				prefsDialog.setVisible(true);
 			});
 			windowMenu.add(prefsMenu);
@@ -704,8 +772,9 @@ public class MainFrame extends JFrame {
 			editMenu.setMnemonic(KeyEvent.VK_E);
 
 			JMenuItem clearAllMenuItem = new JMenuItem("Clear takeOff");
-			clearAllMenuItem.addActionListener((e)->{
+			clearAllMenuItem.addActionListener((e) -> {
 				controller.clearDatabase();
+				setTitlebar(null);
 				refreshTables();
 			});
 			editMenu.add(clearAllMenuItem);
@@ -726,7 +795,7 @@ public class MainFrame extends JFrame {
 		private int mouseX, mouseY;
 		private boolean needsFocus = false;
 		private boolean button1Pressed = false;
-//		private boolean button3Pressed = false;;
+		// private boolean button3Pressed = false;;
 
 		@Override
 		public void mouseWheelMoved(MouseWheelEvent e) {
@@ -748,10 +817,10 @@ public class MainFrame extends JFrame {
 					if (controller.hasActive()) {
 						controller.removeToken(point);
 						updateMarks();
-//					} else {
-//						controller.removeMeasurement(point);
-//						updateMarks();
-//					}
+						// } else {
+						// controller.removeMeasurement(point);
+						// updateMarks();
+						// }
 					}
 					controller.removeMeasurement(point);
 					updateMarks();
@@ -771,16 +840,16 @@ public class MainFrame extends JFrame {
 		public void mousePressed(MouseEvent e) {
 			if (e.getButton() == MouseEvent.BUTTON1)
 				button1Pressed = true;
-//			if (e.getButton() == MouseEvent.BUTTON3)
-//				button3Pressed = true;
+			// if (e.getButton() == MouseEvent.BUTTON3)
+			// button3Pressed = true;
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			if (e.getButton() == MouseEvent.BUTTON1)
 				button1Pressed = false;
-//			if (e.getButton() == MouseEvent.BUTTON3)
-//				button3Pressed = false;
+			// if (e.getButton() == MouseEvent.BUTTON3)
+			// button3Pressed = false;
 		}
 
 		@Override
