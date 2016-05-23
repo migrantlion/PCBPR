@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.text.Document;
-
 import com.plancrawler.controller.fileOps.DocumentHandler;
 import com.plancrawler.controller.fileOps.TableExporter;
 import com.plancrawler.model.Crate;
