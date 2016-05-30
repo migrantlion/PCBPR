@@ -15,7 +15,7 @@ public class DocumentHandler implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String currentFile;
-	private String path = "C:\\Users\\steve\\Documents\\PlanCrawler\\Plans\\";
+	private String path = "user.home";
 	private int numPages, currentPage;
 	public static final int DPI = 300;
 	private HashMap<Integer, Double> pageRotations;
@@ -155,6 +155,10 @@ public class DocumentHandler implements Serializable {
 			pageRotations.clear();
 
 			document.close();
+
+			if (tib == null)
+				tib = TempImageBuffer.getInstance();
+			
 			tib.startBuffer(currentFile, numPages);
 		} catch (IOException e) {
 			e.printStackTrace();

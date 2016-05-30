@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.plancrawler.controller.fileOps.DocumentHandler;
+import com.plancrawler.controller.fileOps.PDFMerge;
 import com.plancrawler.controller.fileOps.TableExporter;
 import com.plancrawler.model.Crate;
 import com.plancrawler.model.Database;
@@ -81,12 +82,15 @@ public class Controller {
 	}
 
 	public void saveToFile(File file) throws IOException {
-		db.saveToFile(file);
+		db.saveToFile(file, pdfDoc);
 	}
 
 	public void loadFromFile(File file) throws IOException {
-		db.loadFromFile(file);
-		loadPDF(new File(db.getAssociatedPDFName()));
+		pdfDoc = db.loadFromFile(file);
+		if (pdfDoc == null)
+			pdfDoc = new DocumentHandler();
+		pdfDoc.setDocProperties();
+//		loadPDF(new File(db.getAssociatedPDFName()));
 	}
 
 	public List<Paintable> getPaintables(int page) {
@@ -312,5 +316,9 @@ public class Controller {
 	public void saveTableAsCSV(ItemTableModel tableModel, File file) {
 		TableExporter.saveTableAsCSV(tableModel, file);
 		
+	}
+
+	public void mergePDFs(File[] files, File saveFile) throws IOException {
+		PDFMerge.mergePDFs(files, saveFile);		
 	}
 }

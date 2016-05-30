@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.plancrawler.controller.fileOps.DocumentHandler;
 import com.plancrawler.model.utilities.MyPoint;
 
 public class Database {
@@ -81,7 +82,7 @@ public class Database {
 		return Collections.unmodifiableList(items);
 	}
 	
-	public void saveToFile(File file) throws IOException {
+	public void saveToFile(File file, DocumentHandler doc) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
 		
@@ -92,11 +93,13 @@ public class Database {
 		oos.writeObject(mArray);
 		oos.writeObject(associatedPDFName);
 		oos.writeObject(warehouse);
+		oos.writeObject(doc);
 		
 		oos.close();
 	}
 	
-	public void loadFromFile(File file) throws IOException {
+	public DocumentHandler loadFromFile(File file) throws IOException {
+		DocumentHandler doc = null;
 		FileInputStream fis = new FileInputStream(file);
 		ObjectInputStream ois = new ObjectInputStream(fis);
 		
@@ -105,6 +108,7 @@ public class Database {
 			Measurement[] mArray = (Measurement[]) ois.readObject();
 			associatedPDFName = (String) ois.readObject();
 			this.warehouse = (CrateDatabase) ois.readObject();
+			doc = (DocumentHandler) ois.readObject();
 			
 			items.clear();
 			items.addAll(Arrays.asList(itemArray));
@@ -116,6 +120,7 @@ public class Database {
 			e.printStackTrace();
 		}	
 		ois.close();
+		return doc;
 	}
 
 	public void deleteRow(int row) {

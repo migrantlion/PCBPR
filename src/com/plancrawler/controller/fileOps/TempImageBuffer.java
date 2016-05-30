@@ -22,11 +22,11 @@ public class TempImageBuffer {
 
 	private class TFileDB {
 		File file;
-		boolean alreadyWritten = false;
+		boolean alreadyWritten;
 
 		public TFileDB(String filename) {
 			this.file = new File(filename);
-			alreadyWritten = false;
+			this.alreadyWritten = false;
 		}
 	}
 
@@ -93,7 +93,6 @@ public class TempImageBuffer {
 			try {
 				readWriteImage(index, image);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

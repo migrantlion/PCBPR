@@ -439,43 +439,47 @@ public class MainFrame extends JFrame {
 
 		if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 			controller.loadPDF(fileChooser.getSelectedFile());
-			SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
-				@Override
-				protected void done() {
-					try {
-						BufferedImage image = get();
-						pdfViewPanel.setImage(image);
-						pdfViewPanel.fitImage();
-						pdfViewPanel.focus();
-						navToolbar.setCurrPage(0);
-						navToolbar.setLastPage(controller.getNumPages());
-						navToolbar.doneProgress();
-						setTitlebar(fileChooser.getSelectedFile().getAbsolutePath());
-						updateMarks();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						e.printStackTrace();
-					}
-				}
-
-				@Override
-				protected BufferedImage doInBackground() throws Exception {
-					navToolbar.showProgress();
-					BufferedImage image = controller.getCurrentPageImage();
-					controller.clearTables();
-					return image;
-				}
-			};
-			worker.execute();
+			loadFirstPDFImage();
 		}
 	}
 	
+	private void loadFirstPDFImage(){
+		SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
+			@Override
+			protected void done() {
+				try {
+					BufferedImage image = get();
+					pdfViewPanel.setImage(image);
+					pdfViewPanel.fitImage();
+					pdfViewPanel.focus();
+					navToolbar.setCurrPage(0);
+					navToolbar.setLastPage(controller.getNumPages());
+					navToolbar.doneProgress();
+					setTitlebar(controller.getAssociatedPDFName());
+					updateMarks();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			protected BufferedImage doInBackground() throws Exception {
+				navToolbar.showProgress();
+				BufferedImage image = controller.getCurrentPageImage();
+				controller.clearTables();
+				return image;
+			}
+		};
+		worker.execute();
+	}
+
 	private void setTitlebar(String pathName) {
 		if (pathName == null)
 			this.setTitle(PCBPR_TITLE);
 		else
-			this.setTitle(PCBPR_TITLE + ":   "+pathName);
+			this.setTitle(PCBPR_TITLE + ":   " + pathName);
 	}
 
 	private void loadTO() {
@@ -515,6 +519,7 @@ public class MainFrame extends JFrame {
 						controller.loadFromFile(fileChooser.getSelectedFile());
 						image = controller.getCurrentPageImage();
 					} catch (Exception e1) {
+						e1.printStackTrace();
 						JOptionPane.showMessageDialog(MainFrame.this, "Could not load data from file.",
 								"Error loading file", JOptionPane.ERROR_MESSAGE);
 					}
@@ -547,6 +552,7 @@ public class MainFrame extends JFrame {
 						setTitlebar(file.getAbsolutePath());
 						refreshTables();
 					} catch (Exception e1) {
+						e1.printStackTrace();
 						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.",
 								"Error saving file", JOptionPane.ERROR_MESSAGE);
 					}
@@ -555,7 +561,6 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	
 	private void reSaveTO(String saveName) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -565,6 +570,7 @@ public class MainFrame extends JFrame {
 					controller.saveToFile(file);
 					refreshTables();
 				} catch (Exception e1) {
+					e1.printStackTrace();
 					JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.", "Error saving file",
 							JOptionPane.ERROR_MESSAGE);
 				}
@@ -593,10 +599,51 @@ public class MainFrame extends JFrame {
 						tableModel.setData(controller.getItems());
 						controller.saveTableAsCSV(tableModel, file);
 					} catch (Exception e1) {
+						e1.printStackTrace();
 						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.",
 								"Error saving file", JOptionPane.ERROR_MESSAGE);
 					}
 				}
+			});
+		}
+	}
+
+	private void mergePDFFiles() {
+		JFileChooser fileChooser = new JFileChooser();
+		JFileChooser saveChooser = new JFileChooser();
+
+		fileChooser.setCurrentDirectory(controller.getCurrentPDFDirectory());
+		fileChooser.resetChoosableFileFilters();
+		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF", "pdf"));
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setMultiSelectionEnabled(true);
+		 
+		if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION){
+			SwingUtilities.invokeLater(new Runnable(){
+				@Override
+				public void run() {
+					try {
+						File[] files = fileChooser.getSelectedFiles();
+						saveChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
+						saveChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF", "pdf"));
+						if (saveChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION){
+							File saveFile;
+							if (!saveChooser.getSelectedFile().getAbsolutePath().endsWith(".pdf"))
+								saveFile = new File(saveChooser.getSelectedFile().getAbsolutePath() + ".pdf");
+							else
+								saveFile = saveChooser.getSelectedFile();
+							controller.mergePDFs(files, saveFile);
+							controller.loadPDF(saveFile);
+							loadFirstPDFImage();
+						}
+						
+					} catch (Exception e1){
+						e1.printStackTrace();
+						JOptionPane.showMessageDialog(MainFrame.this, "Could not merge PDF files.", 
+								"Error merging files", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+				
 			});
 		}
 	}
@@ -631,10 +678,10 @@ public class MainFrame extends JFrame {
 			makeAboutMenu();
 		}
 
-		public boolean isSaveFileSet(){
+		public boolean isSaveFileSet() {
 			return (saveFileName != null);
 		}
-		
+
 		public void setSaveFileName(String filename) {
 			if (filename == null) {
 				reSaveMenuItem.setVisible(false);
@@ -666,7 +713,6 @@ public class MainFrame extends JFrame {
 					reSaveTO(saveFileName);
 			});
 			reSaveMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-			
 
 			JMenuItem exportTO = new JMenuItem("Export TakeOff to CSV");
 			exportTO.addActionListener((e) -> exportToCSV());
@@ -680,6 +726,7 @@ public class MainFrame extends JFrame {
 			exitMenuItem.addActionListener((e) -> exitProgram());
 
 			fileMenu.add(loadPDFMenuItem);
+			fileMenu.addSeparator();
 			fileMenu.add(loadTOMenuItem);
 			fileMenu.addSeparator();
 			fileMenu.add(saveMenuItem);
@@ -778,6 +825,12 @@ public class MainFrame extends JFrame {
 				refreshTables();
 			});
 			editMenu.add(clearAllMenuItem);
+			editMenu.addSeparator();
+
+			JMenuItem mergePDFMenuItem = new JMenuItem("Merge multiple PDFs to one file");
+			mergePDFMenuItem.addActionListener((e) -> mergePDFFiles());
+			editMenu.add(mergePDFMenuItem);
+
 			this.add(editMenu);
 		}
 
@@ -878,4 +931,5 @@ public class MainFrame extends JFrame {
 			}
 		}
 	}
+
 }
