@@ -8,7 +8,8 @@ public class SaveLoadToolbarEvent extends EventObject {
 	private boolean saveRequest = false;
 	private boolean loadRequest = false;
 	private boolean loadPDFRequest = false;
-	
+	private boolean loadMultiPDFRequest = false;
+
 	public SaveLoadToolbarEvent(Object source) {
 		super(source);
 	}
@@ -37,4 +38,12 @@ public class SaveLoadToolbarEvent extends EventObject {
 		this.loadPDFRequest = loadPDFRequest;
 	}
 	
+	public boolean isLoadMultiPDFRequest(){
+		return this.loadMultiPDFRequest;
+	}
+
+	public void setLoadMultiPDFRequest(boolean b) {
+		this.loadMultiPDFRequest  = b;
+	}
+
 }

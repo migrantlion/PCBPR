@@ -87,7 +87,7 @@ public class MainFrame extends JFrame {
 	private Preferences prefs;
 
 	private Controller controller = new Controller();
-	private final static String PCBPR_TITLE = "PlanCrawler Blueprint Reader";
+	private final static String PCBPR_TITLE = "PlanCrawler Blueprint Reader v." + Controller.VERSION;
 
 	public MainFrame() {
 		super(PCBPR_TITLE);
@@ -165,6 +165,8 @@ public class MainFrame extends JFrame {
 		fileToolbar.addSaveLoadToolbarListener((e) -> {
 			if (e.isLoadPDFRequest())
 				loadPDF();
+			if (e.isLoadMultiPDFRequest())
+				mergePDFFiles();
 			if (e.isLoadRequest())
 				loadTO();
 			if (e.isSaveRequest()) {
