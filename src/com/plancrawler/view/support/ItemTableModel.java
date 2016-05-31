@@ -11,13 +11,14 @@ public class ItemTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;
 	private List<Item> db;
-	private String[] colNames = {"Color","Name","Description","Quantity","Category","Found on Pages"};
+	private String[] colNames = { "Color", "Name", "Manufacturer", "Part Number", "Quantity", "Description", "Category",
+			"Found on Pages" };
 
 	public void setData(List<Item> db) {
 		this.db = db;
 	}
-	
-	public Color getRowColor(int row){
+
+	public Color getRowColor(int row) {
 		return db.get(row).getColor();
 	}
 
@@ -26,7 +27,6 @@ public class ItemTableModel extends AbstractTableModel {
 		return colNames[column];
 	}
 
-
 	@Override
 	public int getRowCount() {
 		return db.size();
@@ -34,7 +34,7 @@ public class ItemTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 6;
+		return 8;
 	}
 
 	@Override
@@ -47,18 +47,22 @@ public class ItemTableModel extends AbstractTableModel {
 		case 1:
 			return item.getName();
 		case 2:
-			return item.getDescription();			
+			return item.getManufacturer();
 		case 3:
-			return item.getTokenCount();
+			return item.getPartNumber();
 		case 4:
-			return item.getCategory();
+			return item.getTokenCount();
 		case 5:
+			return item.getDescription();
+		case 6:
+			return item.getCategory();
+		case 7:
 			List<Integer> pages = item.foundOnWhatPage();
 			String pageString = "";
 			for (int p : pages)
-				pageString += Integer.toString(p+1)+", ";
+				pageString += Integer.toString(p + 1) + ", ";
 			if (pageString.endsWith(", "))
-				pageString = pageString.substring(0, pageString.length()-2);
+				pageString = pageString.substring(0, pageString.length() - 2);
 			return pageString;
 		}
 		return null;

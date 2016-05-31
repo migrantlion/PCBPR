@@ -31,8 +31,8 @@ public class EntryFormPanel extends JPanel {
 
 	private ArrayList<EntryFormListener> listeners = new ArrayList<EntryFormListener>();
 
-	private JLabel nameLabel, descLabel, catLabel, colorLabel;
-	private JTextField nameField, descField;
+	private JLabel nameLabel, descLabel, catLabel, colorLabel, manufLabel, partLabel;
+	private JTextField nameField, descField, manufField, partField;
 	private JComboBox<String> catComboBox;
 	private DefaultComboBoxModel<String> catModel = new DefaultComboBoxModel<String>();
 	private JButton colorButt;
@@ -60,9 +60,15 @@ public class EntryFormPanel extends JPanel {
 		nameLabel = new JLabel("entry name:");
 		descLabel = new JLabel("description:");
 		catLabel = new JLabel("category:");
+		manufLabel = new JLabel("manufacturer:");
+		partLabel = new JLabel("part number:");
+
 		nameField = new JTextField(10);
 		origBorder = nameField.getBorder();
 		descField = new JTextField(10);
+		manufField = new JTextField(10);
+		partField = new JTextField(10);
+
 		colorLabel = new JLabel("color");
 		colorLabel.setOpaque(true);
 		setColorLabelColor(ColorUtility.randColor());
@@ -145,6 +151,28 @@ public class EntryFormPanel extends JPanel {
 		gc.gridx = 0;
 		gc.anchor = GridBagConstraints.FIRST_LINE_END;
 		gc.insets = rightPad;
+		add(manufLabel, gc);
+		gc.gridx = 1;
+		gc.anchor = GridBagConstraints.FIRST_LINE_START;
+		gc.insets = noPad;
+		add(manufField, gc);
+
+		// next Row
+		gc.gridy++;
+		gc.gridx = 0;
+		gc.anchor = GridBagConstraints.FIRST_LINE_END;
+		gc.insets = rightPad;
+		add(partLabel, gc);
+		gc.gridx = 1;
+		gc.anchor = GridBagConstraints.FIRST_LINE_START;
+		gc.insets = noPad;
+		add(partField, gc);
+
+		// next Row
+		gc.gridy++;
+		gc.gridx = 0;
+		gc.anchor = GridBagConstraints.FIRST_LINE_END;
+		gc.insets = rightPad;
 		add(catLabel, gc);
 		gc.gridx = 1;
 		gc.anchor = GridBagConstraints.FIRST_LINE_START;
@@ -170,7 +198,7 @@ public class EntryFormPanel extends JPanel {
 		add(new JLabel("  "), gc);
 		gc.gridx = 1;
 		add(new JLabel("  "), gc);
-		
+
 		// separator
 		gc.gridy++;
 		gc.gridx = 0;
@@ -226,6 +254,8 @@ public class EntryFormPanel extends JPanel {
 			EntryFormEvent ie = new EntryFormEvent(EntryFormPanel.this);
 			ie.setEntryName(nameField.getText());
 			ie.setEntryDesc(descField.getText());
+			ie.setEntryManufacturer(manufField.getText());
+			ie.setEntryPartNumber(partField.getText());
 			ie.setEntryCat((String) catComboBox.getSelectedItem());
 			if (colorLabel.getBackground() == nocolor)
 				ie.setEntryColor(ColorUtility.randColor());

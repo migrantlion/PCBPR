@@ -24,7 +24,7 @@ public class EntryModifyDialog {
 
 		// setup labels
 		JLabel headerLabel = new JLabel("Modify properties of Item Entry");
-		
+
 		JLabel icolorLabel = new JLabel("old color: ");
 		JLabel oldcolorLabel = new JLabel("     ");
 		oldcolorLabel.setOpaque(true);
@@ -33,6 +33,8 @@ public class EntryModifyDialog {
 
 		JTextField newNameField = new JTextField(item.getName(), 10);
 		JTextField newDescField = new JTextField(item.getDescription(), 10);
+		JTextField newManufField = new JTextField(item.getManufacturer(), 10);
+		JTextField newPartField = new JTextField(item.getPartNumber(), 10);
 		JTextField newCatField = new JTextField(item.getCategory(), 10);
 		JButton colorButt = new JButton("Pick New Color");
 		colorButt.setBackground(item.getColor());
@@ -78,6 +80,24 @@ public class EntryModifyDialog {
 		gc.gridx = 1;
 		gc.anchor = GridBagConstraints.FIRST_LINE_END;
 		gc.insets = rightPad;
+		panel.add(new JLabel("new manuf: "), gc);
+		gc.gridx++;
+		panel.add(newManufField, gc);
+
+		// next Row
+		gc.gridy++;
+		gc.gridx = 1;
+		gc.anchor = GridBagConstraints.FIRST_LINE_END;
+		gc.insets = rightPad;
+		panel.add(new JLabel("new part #: "), gc);
+		gc.gridx++;
+		panel.add(newPartField, gc);
+
+		// next Row
+		gc.gridy++;
+		gc.gridx = 1;
+		gc.anchor = GridBagConstraints.FIRST_LINE_END;
+		gc.insets = rightPad;
 		panel.add(new JLabel("new category: "), gc);
 		gc.gridx++;
 		panel.add(newCatField, gc);
@@ -103,9 +123,10 @@ public class EntryModifyDialog {
 		// populate event and pass back
 		if (result == JOptionPane.OK_OPTION)
 			ife = new EntryFormEvent(result, newNameField.getText(), newDescField.getText(), newCatField.getText(),
-					colorButt.getBackground());
+					colorButt.getBackground(), newManufField.getText(), newPartField.getText());
 		else
-			ife = new EntryFormEvent(result, item.getName(), item.getDescription(), item.getCategory(), item.getColor());
+			ife = new EntryFormEvent(result, item.getName(), item.getDescription(), item.getCategory(),
+					item.getColor(), item.getManufacturer(), item.getPartNumber());
 
 		return ife;
 	}

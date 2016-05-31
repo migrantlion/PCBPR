@@ -5,7 +5,7 @@ import java.util.EventObject;
 
 public class EntryFormEvent extends EventObject {
 	static final long serialVersionUID = 1L;
-	private String entryName, entryDesc, entryCat;
+	private String entryName, entryDesc, entryCat, entryManufacturer, entryPartNumber;
 	private Color entryColor;
 	private boolean addItem, addCrate;
 
@@ -21,6 +21,13 @@ public class EntryFormEvent extends EventObject {
 		this.entryColor = color;
 		this.addItem = false;
 		this.addCrate = false;
+	}
+
+	public EntryFormEvent(Object source, String name, String desc, String cat, Color color, String manuf,
+			String part) {
+		this(source, name, desc, cat, color);
+		this.entryManufacturer = manuf;
+		this.entryPartNumber = part;
 	}
 
 	public String getEntryName() {
@@ -70,4 +77,21 @@ public class EntryFormEvent extends EventObject {
 	public void setAddCrate(boolean addCrate) {
 		this.addCrate = addCrate;
 	}
+
+	public String getEntryManufacturer() {
+		return entryManufacturer;
+	}
+
+	public void setEntryManufacturer(String entryManufacturer) {
+		this.entryManufacturer = entryManufacturer;
+	}
+
+	public String getEntryPartNumber() {
+		return entryPartNumber;
+	}
+
+	public void setEntryPartNumber(String entryPartNumber) {
+		this.entryPartNumber = entryPartNumber;
+	}
+
 }

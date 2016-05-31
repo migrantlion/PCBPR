@@ -13,10 +13,6 @@ public class Item extends Entry implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static int counter = 0;
 	private int id;
-//	private String name;
-//	private String description;
-//	private String category;
-//	private Color color;
 
 	private CopyOnWriteArrayList<Token> tokens = new CopyOnWriteArrayList<Token>();
 
@@ -31,6 +27,12 @@ public class Item extends Entry implements Serializable {
 	
 	public Item(Entry entry){
 		this(entry.name, entry.description, entry.category, entry.color);
+	}
+
+	public Item(String name, String desc, String cat, Color color, String manufacturer, String partNumber) {
+		this(name, desc, cat, color);
+		this.manufacturer = manufacturer;
+		this.partNumber = partNumber;
 	}
 
 	public void addToken(Location loc, TokenLocations whereAt) {

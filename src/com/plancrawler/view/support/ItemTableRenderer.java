@@ -18,28 +18,28 @@ public class ItemTableRenderer extends DefaultTableCellRenderer {
 			int row, int col) {
 
 		// Cells are by default rendered as a JLabel.
-		JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+		JLabel lbl = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 
 		// Get the color for the current row.
 		ItemTableModel tableModel = (ItemTableModel) table.getModel();
 		Color color = tableModel.getRowColor(row);
 		if (col == 0) {
-			l.setBackground(color);
+			lbl.setBackground(color);
 		} else {
-			l.setBackground(Color.white);
+			lbl.setBackground(Color.white);
 		}
-		if (col == 3) {
+		if (col == 4) {
 			// quantity
-			l.setHorizontalAlignment(SwingConstants.CENTER);
+			lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		} else
-			l.setHorizontalAlignment(SwingConstants.LEFT);
+			lbl.setHorizontalAlignment(SwingConstants.LEFT);
 
 		if (table.isRowSelected(row)) {
-			l.setBorder(BorderFactory.createLineBorder(Color.magenta, 2));
+			lbl.setBorder(BorderFactory.createLineBorder(Color.magenta, 2));
 		}
 
 		// Return the JLabel which renders the cell.
-		return l;
+		return lbl;
 
 	}
 
