@@ -230,7 +230,7 @@ public class Controller {
 	}
 
 	public void modifyItem(int row, EntryFormEvent ife) {
-		Item item = new Item(ife.getEntryName(), ife.getEntryDesc(), ife.getEntryCat(), ife.getEntryColor());
+		Item item = new Item(ife.getEntryName(), ife.getEntryDesc(), ife.getEntryCat(), ife.getEntryColor(), ife.getEntryManufacturer(), ife.getEntryPartNumber());
 		db.modifyEntry(row, item);
 	}
 
