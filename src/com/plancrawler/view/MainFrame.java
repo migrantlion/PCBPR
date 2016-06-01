@@ -151,8 +151,8 @@ public class MainFrame extends JFrame {
 
 	private void addComponents() {
 		addToolbarComponents();
-//		addWestComponents();
-//		addEastComponents();
+		// addWestComponents();
+		// addEastComponents();
 		addCenterComponents();
 	}
 
@@ -244,15 +244,15 @@ public class MainFrame extends JFrame {
 
 		centerTabPane.addTab("PDF View", pdfViewPanel);
 		centerTabPane.addTab("Take-Off View", tablePanel);
-		
+
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerTabPane, getEastPanel());
 		splitPane.setDividerLocation(1000);
 		splitPane.setOneTouchExpandable(true);
-		
+
 		JSplitPane splitPane2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, getWestPanel(), splitPane);
 		splitPane2.setOneTouchExpandable(true);
 		splitPane2.setDividerLocation(-1);
-//		this.add(centerTabPane, BorderLayout.CENTER);
+		// this.add(centerTabPane, BorderLayout.CENTER);
 		this.add(splitPane2, BorderLayout.CENTER);
 	}
 
@@ -343,7 +343,7 @@ public class MainFrame extends JFrame {
 		});
 		westPanel.add(crateSelectPanel);
 
-//		this.add(westPanel, BorderLayout.WEST);
+		// this.add(westPanel, BorderLayout.WEST);
 		return westPanel;
 	}
 
@@ -435,8 +435,8 @@ public class MainFrame extends JFrame {
 			loadFirstPDFImage();
 		}
 	}
-	
-	private void loadFirstPDFImage(){
+
+	private void loadFirstPDFImage() {
 		SwingWorker<BufferedImage, Void> worker = new SwingWorker<BufferedImage, Void>() {
 			@Override
 			protected void done() {
@@ -544,6 +544,8 @@ public class MainFrame extends JFrame {
 						pcMenubar.setSaveFileName(file.getAbsolutePath());
 						setTitlebar(file.getAbsolutePath());
 						refreshTables();
+						JOptionPane.showMessageDialog(MainFrame.this, "File Saved", "Save successful",
+								JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e1) {
 						e1.printStackTrace();
 						JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.",
@@ -562,6 +564,8 @@ public class MainFrame extends JFrame {
 					File file = new File(saveName);
 					controller.saveToFile(file);
 					refreshTables();
+					JOptionPane.showMessageDialog(MainFrame.this, "File Saved", "Save successful",
+							JOptionPane.INFORMATION_MESSAGE);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(MainFrame.this, "Could not save data to file.", "Error saving file",
@@ -610,16 +614,16 @@ public class MainFrame extends JFrame {
 		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF", "pdf"));
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setMultiSelectionEnabled(true);
-		 
-		if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION){
-			SwingUtilities.invokeLater(new Runnable(){
+
+		if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
 					try {
 						File[] files = fileChooser.getSelectedFiles();
 						saveChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
 						saveChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF", "pdf"));
-						if (saveChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION){
+						if (saveChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 							File saveFile;
 							if (!saveChooser.getSelectedFile().getAbsolutePath().endsWith(".pdf"))
 								saveFile = new File(saveChooser.getSelectedFile().getAbsolutePath() + ".pdf");
@@ -629,14 +633,14 @@ public class MainFrame extends JFrame {
 							controller.loadPDF(saveFile);
 							loadFirstPDFImage();
 						}
-						
-					} catch (Exception e1){
+
+					} catch (Exception e1) {
 						e1.printStackTrace();
-						JOptionPane.showMessageDialog(MainFrame.this, "Could not merge PDF files.", 
+						JOptionPane.showMessageDialog(MainFrame.this, "Could not merge PDF files.",
 								"Error merging files", JOptionPane.ERROR_MESSAGE);
 					}
 				}
-				
+
 			});
 		}
 	}
