@@ -151,8 +151,8 @@ public class MainFrame extends JFrame {
 
 	private void addComponents() {
 		addToolbarComponents();
-		addWestComponents();
-		addEastComponents();
+//		addWestComponents();
+//		addEastComponents();
 		addCenterComponents();
 	}
 
@@ -242,30 +242,21 @@ public class MainFrame extends JFrame {
 
 		tablePanel.setData(controller.getItems());
 
-		// cratePanel.setData(controller.getCrates());
-		// cratePanel.addTableListener((t)->{
-		// controller.setCratePanelActive(t.getRow());
-		// itemsInCratePanel.setTitle("Items in Crate:
-		// "+controller.getActiveCrateName());
-		// itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive()));
-		// itemsInCratePanel.refresh();
-		// });
-		//
-		// itemsInCratePanel.setData(controller.getItemsInCrate(-1));
-		//
-		// JSplitPane splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-		// cratePanel, itemsInCratePanel);
-		// splitPanel.setDividerLocation(0.5);
-		// splitPanel.setOneTouchExpandable(true);
-
 		centerTabPane.addTab("PDF View", pdfViewPanel);
 		centerTabPane.addTab("Take-Off View", tablePanel);
-		// centerTabPane.addTab("Crate View", splitPanel);
-
-		this.add(centerTabPane, BorderLayout.CENTER);
+		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerTabPane, getEastPanel());
+		splitPane.setDividerLocation(1000);
+		splitPane.setOneTouchExpandable(true);
+		
+		JSplitPane splitPane2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, getWestPanel(), splitPane);
+		splitPane2.setOneTouchExpandable(true);
+		splitPane2.setDividerLocation(-1);
+//		this.add(centerTabPane, BorderLayout.CENTER);
+		this.add(splitPane2, BorderLayout.CENTER);
 	}
 
-	private void addEastComponents() {
+	private JPanel getEastPanel() {
 		eastPanel = new JPanel();
 		// Dimension dim = eastPanel.getPreferredSize();
 		// dim.width = 450;
@@ -287,10 +278,10 @@ public class MainFrame extends JFrame {
 		splitPanel.setOneTouchExpandable(true);
 
 		eastPanel.add(splitPanel);
-		this.add(eastPanel, BorderLayout.EAST);
+		return eastPanel;
 	}
 
-	private void addWestComponents() {
+	private JPanel getWestPanel() {
 		westPanel = new JPanel();
 		westPanel.setLayout(new GridLayout(0, 1));
 
@@ -352,8 +343,8 @@ public class MainFrame extends JFrame {
 		});
 		westPanel.add(crateSelectPanel);
 
-		this.add(westPanel, BorderLayout.WEST);
-
+//		this.add(westPanel, BorderLayout.WEST);
+		return westPanel;
 	}
 
 	private void setSelNotifyToolbar() {

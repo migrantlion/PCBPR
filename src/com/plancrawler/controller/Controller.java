@@ -23,8 +23,8 @@ import com.plancrawler.view.toolbars.RotToolbarEvent;
 
 public class Controller {
 
-	public final static String VERSION = "1.3.1";
-	
+	public final static String VERSION = "1.4.1";
+
 	private Database db;
 	private DocumentHandler pdfDoc;
 	private int activeItemRow = -1;
@@ -46,8 +46,8 @@ public class Controller {
 		db.setAssociatedPDFName(pdfDoc.getCurrentFile());
 		return pdfDoc.getCurrentFile();
 	}
-	
-	public void cleanup(){
+
+	public void cleanup() {
 		pdfDoc.cleanUp();
 	}
 
@@ -94,7 +94,6 @@ public class Controller {
 		if (pdfDoc == null)
 			pdfDoc = new DocumentHandler();
 		pdfDoc.setDocProperties();
-//		loadPDF(new File(db.getAssociatedPDFName()));
 	}
 
 	public List<Paintable> getPaintables(int page) {
@@ -173,8 +172,9 @@ public class Controller {
 	public void dropToken(MyPoint point) {
 		if (isMeasuring)
 			return;
-		
-		Location loc= new Location(getCurrentPage(), point);;
+
+		Location loc = new Location(getCurrentPage(), point);
+		;
 		if (hasActiveItem() && hasActiveCrate()) {
 			// place item in crate
 			db.addItemToCrate(loc, activeItemRow, activeCrateRow);
@@ -188,20 +188,20 @@ public class Controller {
 
 	public void removeToken(MyPoint point) {
 		Location loc = new Location(getCurrentPage(), point);
-		if (hasActiveItem() && hasActiveCrate()){
+		if (hasActiveItem() && hasActiveCrate()) {
 			db.remItemFromCrate(loc, activeItemRow, activeCrateRow);
-		} else if (hasActiveCrate()){
+		} else if (hasActiveCrate()) {
 			db.remTokenFromCrate(loc, activeCrateRow);
 		} else if (hasActiveItem()) {
-			db.remTokenFromItem(loc, activeItemRow); 
+			db.remTokenFromItem(loc, activeItemRow);
 		}
 	}
 
 	public void clearTables() {
 		db.wipeTokens();
 	}
-	
-	public void clearDatabase(){
+
+	public void clearDatabase() {
 		db.clearAll();
 	}
 
@@ -305,8 +305,8 @@ public class Controller {
 		else
 			return null;
 	}
-	
-	public String getActiveItemName(){
+
+	public String getActiveItemName() {
 		if (hasActiveItem())
 			return db.getItem(activeItemRow).getName();
 		else
@@ -319,10 +319,10 @@ public class Controller {
 
 	public void saveTableAsCSV(ItemTableModel tableModel, File file) {
 		TableExporter.saveTableAsCSV(tableModel, file);
-		
+
 	}
 
 	public void mergePDFs(File[] files, File saveFile) throws IOException {
-		PDFMerge.mergePDFs(files, saveFile);		
+		PDFMerge.mergePDFs(files, saveFile);
 	}
 }

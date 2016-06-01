@@ -21,6 +21,20 @@ public class ItemTableModel extends AbstractTableModel {
 	public Color getRowColor(int row) {
 		return db.get(row).getColor();
 	}
+	
+	@Override
+	public boolean isCellEditable(int row, int col) {
+		// only allow changes to entity values, not calculated values
+		if ((col > 0 && col < 4) || col == 5 || col == 6)
+			return true;
+		else
+			return false;
+	}
+
+	@Override
+	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		// TODO add listener call to alert that user has edited table and to store info back
+	}
 
 	@Override
 	public String getColumnName(int column) {

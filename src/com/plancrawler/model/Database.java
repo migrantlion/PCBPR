@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,7 +16,8 @@ import java.util.List;
 import com.plancrawler.controller.fileOps.DocumentHandler;
 import com.plancrawler.model.utilities.MyPoint;
 
-public class Database {
+public class Database implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private static Database uniqueInstance = new Database();
 	
 	private String associatedPDFName = null;

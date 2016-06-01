@@ -170,8 +170,10 @@ public class Crate extends Entry implements Serializable {
 			for (Token t : tdb.placedTokens)
 				if (t.isAtLocation(remToken.getLocation()))
 					pToken = t;
-			if (pToken != null)
+			if (pToken != null) {
+				tdb.item.remToken(pToken);
 				tdb.placedTokens.remove(pToken);
+			}
 		}
 
 		// now remove the token from the crate

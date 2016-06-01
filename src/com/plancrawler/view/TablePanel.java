@@ -39,7 +39,7 @@ public class TablePanel extends JPanel {
 		table = new JTable(tableModel);
 		ItemTableRenderer renderer = new ItemTableRenderer();
 		table.setDefaultRenderer(table.getColumnClass(0), renderer);
-		
+				
 		table.addMouseListener(new MouseAdapter() {
 			
 			@Override
