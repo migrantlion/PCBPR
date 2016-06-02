@@ -165,6 +165,16 @@ public class DocumentHandler implements Serializable {
 		}
 	}
 	
+	public void restartBuffer(){
+		if (tib == null)
+			tib = TempImageBuffer.getInstance();
+		
+		if (currentFile == null || numPages == 0)
+			return;
+		else
+			tib.startBuffer(currentFile, numPages);
+	}
+	
 	public int getNumPages() {
 		return numPages;
 	}

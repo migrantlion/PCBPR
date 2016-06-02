@@ -494,7 +494,7 @@ public class MainFrame extends JFrame {
 						pdfViewPanel.setImage(image);
 						pdfViewPanel.fitImage();
 						pdfViewPanel.focus();
-						navToolbar.setCurrPage(0);
+						navToolbar.setCurrPage(controller.getCurrentPage());
 						navToolbar.setLastPage(controller.getNumPages());
 						navToolbar.doneProgress();
 						pcMenubar.setSaveFileName(fileChooser.getSelectedFile().getAbsolutePath());

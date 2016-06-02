@@ -23,7 +23,7 @@ import com.plancrawler.view.toolbars.RotToolbarEvent;
 
 public class Controller {
 
-	public final static String VERSION = "1.4.1a";
+	public final static String VERSION = "1.4.2";
 
 	private Database db;
 	private DocumentHandler pdfDoc;
@@ -93,7 +93,7 @@ public class Controller {
 		pdfDoc = db.loadFromFile(file);
 		if (pdfDoc == null)
 			pdfDoc = new DocumentHandler();
-		pdfDoc.setDocProperties();
+		pdfDoc.restartBuffer();
 	}
 
 	public List<Paintable> getPaintables(int page) {
