@@ -48,6 +48,7 @@ public class EntryFormPanel extends JPanel {
 	private void setupPanel() {
 		Dimension dim = getPreferredSize();
 		dim.width = 250;
+		dim.height = 450;
 		setPreferredSize(dim);
 
 		Border innerBorder = BorderFactory.createTitledBorder("Add Entry");
@@ -212,17 +213,18 @@ public class EntryFormPanel extends JPanel {
 		gc.anchor = GridBagConstraints.NORTH;
 		gc.fill = GridBagConstraints.NONE;
 		gc.gridwidth = GridBagConstraints.RELATIVE;
-		gc.weighty = 10.0;
+		gc.weighty = 5.0;
 		gc.gridx = 0;
 		add(addCrateButt, gc);
 		gc.gridx = 1;
-		add(addItemButt, gc);
+		add(addItemButt, gc);		
 	}
 
 	public void clearForm() {
 		nameField.setText("");
 		nameField.setBorder(origBorder);
 		descField.setText("");
+		partField.setText("");
 		setColorLabelColor(ColorUtility.randColor());
 	}
 

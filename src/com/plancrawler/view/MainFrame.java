@@ -79,7 +79,8 @@ public class MainFrame extends JFrame {
 	private CrateSelectionPanel crateSelectPanel = new CrateSelectionPanel();
 
 	// Panels
-	private JPanel westPanel;
+	// private JPanel westPanel;
+	private JSplitPane westPanel;
 	private JPanel eastPanel;
 
 	// Dialogs
@@ -258,9 +259,6 @@ public class MainFrame extends JFrame {
 
 	private JPanel getEastPanel() {
 		eastPanel = new JPanel();
-		// Dimension dim = eastPanel.getPreferredSize();
-		// dim.width = 450;
-		// eastPanel.setPreferredSize(dim);
 		eastPanel.setLayout(new GridLayout(0, 1));
 
 		cratePanel.setData(controller.getCrates());
@@ -281,9 +279,10 @@ public class MainFrame extends JFrame {
 		return eastPanel;
 	}
 
-	private JPanel getWestPanel() {
-		westPanel = new JPanel();
-		westPanel.setLayout(new GridLayout(0, 1));
+	// private JPanel getWestPanel() {
+	private JSplitPane getWestPanel() {
+		// westPanel = new JPanel();
+		// westPanel.setLayout(new GridLayout(0, 1));
 
 		entryFormPanel.addFormListener((e) -> {
 			int action = JOptionPane.OK_OPTION;
@@ -311,7 +310,7 @@ public class MainFrame extends JFrame {
 			}
 			refreshTables();
 		});
-		westPanel.add(entryFormPanel);
+		// westPanel.add(entryFormPanel);
 
 		itemSelectPanel.setData(controller.getItems());
 		itemSelectPanel.addItemSelectionListener((e) -> {
@@ -326,7 +325,7 @@ public class MainFrame extends JFrame {
 				refreshTables();
 			}
 		});
-		westPanel.add(itemSelectPanel);
+		// westPanel.add(itemSelectPanel);
 
 		crateSelectPanel.setData(controller.getCrates());
 		crateSelectPanel.addItemSelectionListener((e) -> {
@@ -341,8 +340,11 @@ public class MainFrame extends JFrame {
 				refreshTables();
 			}
 		});
-		westPanel.add(crateSelectPanel);
-
+//		westPanel.add(crateSelectPanel);
+		JSplitPane botPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, itemSelectPanel, crateSelectPanel);
+		botPanel.setOneTouchExpandable(true);
+		westPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, entryFormPanel, botPanel);
+		westPanel.setDividerLocation((int) (entryFormPanel.getPreferredSize().getHeight()));
 		// this.add(westPanel, BorderLayout.WEST);
 		return westPanel;
 	}
