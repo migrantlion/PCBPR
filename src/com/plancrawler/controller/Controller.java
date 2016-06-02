@@ -23,7 +23,7 @@ import com.plancrawler.view.toolbars.RotToolbarEvent;
 
 public class Controller {
 
-	public final static String VERSION = "1.4.0a";
+	public final static String VERSION = "1.4.1";
 
 	private Database db;
 	private DocumentHandler pdfDoc;
