@@ -695,7 +695,10 @@ public class MainFrame extends JFrame {
 			fileMenu.setMnemonic(KeyEvent.VK_F);
 
 			JMenuItem loadPDFMenuItem = new JMenuItem("Load PDF");
-			loadPDFMenuItem.addActionListener((e) -> loadPDF());
+			loadPDFMenuItem.addActionListener((e) -> {
+				loadPDF();
+				saveFileName = null;
+			});
 
 			JMenuItem loadTOMenuItem = new JMenuItem("Load TakeOff");
 			loadTOMenuItem.addActionListener((e) -> loadTO());
