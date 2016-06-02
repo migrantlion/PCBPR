@@ -12,6 +12,15 @@ public class Entry implements Serializable, Comparable<Entry> {
 	protected String manufacturer;
 	protected String partNumber;
 
+	public void copyProperties(Entry e){
+		this.name = e.name;
+		this.description = e.description;
+		this.category = e.category;
+		this.color = e.color;
+		this.manufacturer = e.manufacturer;
+		this.partNumber = e.partNumber;
+	}
+	
 	public String getName() {
 		return name;
 	}

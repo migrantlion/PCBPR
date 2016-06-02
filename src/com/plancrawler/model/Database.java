@@ -161,10 +161,7 @@ public class Database implements Serializable{
 		if (entry == null)
 			addItem(item);
 		else {
-			entry.setName(item.getName());
-			entry.setDescription(item.getDescription());
-			entry.setCategory(item.getCategory());
-			entry.setColor(item.getColor());
+			entry.copyProperties(item);
 		}
 	}
 
