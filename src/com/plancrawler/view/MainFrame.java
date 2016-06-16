@@ -279,11 +279,7 @@ public class MainFrame extends JFrame {
 		return eastPanel;
 	}
 
-	// private JPanel getWestPanel() {
 	private JSplitPane getWestPanel() {
-		// westPanel = new JPanel();
-		// westPanel.setLayout(new GridLayout(0, 1));
-
 		entryFormPanel.addFormListener((e) -> {
 			int action = JOptionPane.OK_OPTION;
 			if (e.isAddItem()) {
@@ -310,7 +306,6 @@ public class MainFrame extends JFrame {
 			}
 			refreshTables();
 		});
-		// westPanel.add(entryFormPanel);
 
 		itemSelectPanel.setData(controller.getItems());
 		itemSelectPanel.addItemSelectionListener((e) -> {
@@ -325,7 +320,6 @@ public class MainFrame extends JFrame {
 				refreshTables();
 			}
 		});
-		// westPanel.add(itemSelectPanel);
 
 		crateSelectPanel.setData(controller.getCrates());
 		crateSelectPanel.addItemSelectionListener((e) -> {
@@ -340,12 +334,13 @@ public class MainFrame extends JFrame {
 				refreshTables();
 			}
 		});
-//		westPanel.add(crateSelectPanel);
+
 		JSplitPane botPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, itemSelectPanel, crateSelectPanel);
 		botPanel.setOneTouchExpandable(true);
+		botPanel.setDividerLocation(0.5f);
 		westPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, entryFormPanel, botPanel);
 		westPanel.setDividerLocation((int) (entryFormPanel.getPreferredSize().getHeight()));
-		// this.add(westPanel, BorderLayout.WEST);
+
 		return westPanel;
 	}
 
@@ -434,6 +429,7 @@ public class MainFrame extends JFrame {
 
 		if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 			controller.loadPDF(fileChooser.getSelectedFile());
+			pcMenubar.setSaveFileName(null);
 			loadFirstPDFImage();
 		}
 	}
@@ -844,6 +840,7 @@ public class MainFrame extends JFrame {
 			aboutMenu.add(aboutMenuItem);
 			this.add(aboutMenu);
 		}
+		
 	}
 
 	private class MouseHandler implements MouseWheelListener, MouseInputListener, MouseMotionListener {

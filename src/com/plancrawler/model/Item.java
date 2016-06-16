@@ -35,6 +35,13 @@ public class Item extends Entry implements Serializable {
 		this.partNumber = partNumber;
 	}
 
+	@Override
+	public void copyProperties(Entry e){
+		super.copyProperties(e);
+		for (Token token : tokens)
+			token.setColor(color);
+	}
+	
 	public void addToken(Location loc, TokenLocations whereAt) {
 		Token token = new Token(loc, color, whereAt);
 		tokens.add(token);
