@@ -348,34 +348,32 @@ public class MainFrame extends JFrame {
 		selNotifyToolbar.changeTitle(controller.getActiveItemName(), controller.getActiveCrateName());
 	}
 
-	private void resetTableData() {
-		controller.setActiveCrateRow(-1);
-		controller.setActiveItemRow(-1);
-		controller.setCratePanelActive(-1);
+	private void refreshTables() {
 		setSelNotifyToolbar();
 
 		itemSelectPanel.setData(controller.getItems());
 		crateSelectPanel.setData(controller.getCrates());
 		tablePanel.setData(controller.getItems());
 		cratePanel.setData(controller.getCrates());
-		refreshTables();
-	}
-
-	private void refreshTables() {
-		controller.setActiveCrateRow(-1);
-		controller.setActiveItemRow(-1);
-		controller.setCratePanelActive(-1);
+		itemsInCratePanel.setTitle("Items in Crate:  " + controller.getActiveCrateName());
+		itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive()));
 		setSelNotifyToolbar();
 
 		tablePanel.refresh();
 		itemSelectPanel.refresh();
 		crateSelectPanel.refresh();
 		cratePanel.refresh();
-		itemsInCratePanel.setTitle("Items in Crate:  " + controller.getActiveCrateName());
-		itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive()));
 		itemsInCratePanel.refresh();
 		// if tables are updated, then Marks probably need to be as well
 		updateMarks();
+	}
+	
+	private void updateCrateItemPanels(){
+		cratePanel.setData(controller.getCrates());
+		itemsInCratePanel.setTitle("Items in Crate:  " + controller.getActiveCrateName());
+		itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive()));
+		cratePanel.refresh();
+		itemsInCratePanel.refresh();
 	}
 
 	private void updateMarks() {
@@ -495,7 +493,7 @@ public class MainFrame extends JFrame {
 						navToolbar.doneProgress();
 						pcMenubar.setSaveFileName(fileChooser.getSelectedFile().getAbsolutePath());
 						setTitlebar(fileChooser.getSelectedFile().getAbsolutePath());
-						resetTableData();
+						refreshTables();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					} catch (ExecutionException e) {
@@ -864,11 +862,13 @@ public class MainFrame extends JFrame {
 					if (controller.hasActive() && !controller.isMeasuring()) {
 						controller.dropToken(point);
 						updateMarks();
+						updateCrateItemPanels();
 					}
 				} else if (e.getButton() == MouseEvent.BUTTON3) {
 					if (controller.hasActive()) {
 						controller.removeToken(point);
 						updateMarks();
+						updateCrateItemPanels();
 						// } else {
 						// controller.removeMeasurement(point);
 						// updateMarks();
