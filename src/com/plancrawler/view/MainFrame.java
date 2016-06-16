@@ -44,6 +44,7 @@ import com.plancrawler.controller.Controller;
 import com.plancrawler.controller.Paintable;
 import com.plancrawler.model.utilities.MyPoint;
 import com.plancrawler.view.dialogs.EntryModifyDialog;
+import com.plancrawler.view.dialogs.PrefsDialog;
 import com.plancrawler.view.support.EntryFormEvent;
 import com.plancrawler.view.support.ItemTableModel;
 import com.plancrawler.view.support.PrefsListener;
@@ -367,8 +368,8 @@ public class MainFrame extends JFrame {
 		// if tables are updated, then Marks probably need to be as well
 		updateMarks();
 	}
-	
-	private void updateCrateItemPanels(){
+
+	private void updateCrateItemPanels() {
 		cratePanel.setData(controller.getCrates());
 		itemsInCratePanel.setTitle("Items in Crate:  " + controller.getActiveCrateName());
 		itemsInCratePanel.setData(controller.getItemsInCrate(controller.getCratePanelActive()));
@@ -838,7 +839,7 @@ public class MainFrame extends JFrame {
 			aboutMenu.add(aboutMenuItem);
 			this.add(aboutMenu);
 		}
-		
+
 	}
 
 	private class MouseHandler implements MouseWheelListener, MouseInputListener, MouseMotionListener {

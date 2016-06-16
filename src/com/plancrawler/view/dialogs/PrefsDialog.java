@@ -1,4 +1,4 @@
-package com.plancrawler.view;
+package com.plancrawler.view.dialogs;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
