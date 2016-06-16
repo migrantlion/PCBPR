@@ -8,5 +8,10 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/steve/Documents/Java Development/Java_JAR_files/pdfbox-app-2.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/steve/Documents/Java Development/Java_JAR_files/JBig2-imageIO/levigo-jbig2-imageio-1.6.5.jar" sourcepath="C:/Users/steve/Documents/Java Development/Java_JAR_files/JBig2-imageIO/levigo-jbig2-imageio-1.6.5-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/steve/Documents/Java%20Development/Java_JAR_files/JBig2-imageIO/levigo-jbig2-imageio-1.6.5-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

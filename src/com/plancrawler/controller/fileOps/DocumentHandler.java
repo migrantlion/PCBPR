@@ -17,7 +17,7 @@ public class DocumentHandler implements Serializable {
 	private String currentFile;
 	private String path = "user.home";
 	private int numPages, currentPage;
-	public static final int DPI = 300;
+	public static final int DPI = 200;
 	private HashMap<Integer, Double> pageRotations;
 	private HashMap<Integer, Double> pageCalibration;
 	private transient TempImageBuffer tib;
