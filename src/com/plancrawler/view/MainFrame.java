@@ -628,6 +628,7 @@ public class MainFrame extends JFrame {
 								saveFile = saveChooser.getSelectedFile();
 							controller.mergePDFs(files, saveFile);
 							controller.loadPDF(saveFile);
+							pcMenubar.setSaveFileName(null);
 							loadFirstPDFImage();
 						}
 
@@ -819,6 +820,7 @@ public class MainFrame extends JFrame {
 			clearAllMenuItem.addActionListener((e) -> {
 				controller.clearDatabase();
 				setTitlebar(null);
+				pcMenubar.setSaveFileName(null);
 				refreshTables();
 			});
 			editMenu.add(clearAllMenuItem);
