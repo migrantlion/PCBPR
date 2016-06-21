@@ -17,7 +17,7 @@ public class DocumentHandler implements Serializable {
 	private String currentFile;
 	private String path = "user.home";
 	private int numPages, currentPage;
-	public static final int DPI = 200;
+	private int DPI = 200;
 	private HashMap<Integer, Double> pageRotations;
 	private HashMap<Integer, Double> pageCalibration;
 	private transient TempImageBuffer tib;
@@ -159,7 +159,7 @@ public class DocumentHandler implements Serializable {
 			if (tib == null)
 				tib = TempImageBuffer.getInstance();
 			
-			tib.startBuffer(currentFile, numPages);
+			tib.startBuffer(currentFile, numPages, DPI);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -172,7 +172,7 @@ public class DocumentHandler implements Serializable {
 		if (currentFile == null || numPages == 0)
 			return;
 		else
-			tib.startBuffer(currentFile, numPages);
+			tib.startBuffer(currentFile, numPages, DPI);
 	}
 	
 	public int getNumPages() {
@@ -221,5 +221,20 @@ public class DocumentHandler implements Serializable {
 		tib.setPath(tempPath);
 	}
 
+	public void setDPI(int val){
+		if (val < 100) 
+			val = 100;
+		if (val > 300)
+			val = 300;
+		if (DPI != val) {
+			DPI = val;
+			clearBuffer();
+			restartBuffer();
+		}
+	}
+	
+	public int getDPI(){
+		return DPI;
+	}
 }
 

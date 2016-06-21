@@ -19,6 +19,7 @@ public class TempImageBuffer {
 	private String fileHead = "pcbpr";
 	private String randchars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890_";
 	private List<String> usedNames = new ArrayList<String>();
+	private int DPI;
 
 	private class TFileDB {
 		File file;
@@ -62,7 +63,8 @@ public class TempImageBuffer {
 		tfdb = null;
 	}
 
-	public void startBuffer(String fileName, int numPages) {
+	public void startBuffer(String fileName, int numPages, int dpi) {
+		this.DPI = dpi;
 		this.pdfFileName = fileName;
 		// setup the buffer database
 		tfdb = new TFileDB[numPages];
@@ -103,7 +105,7 @@ public class TempImageBuffer {
 		BufferedImage image = null;
 		try (PDDocument document = PDDocument.load(new File(pdfFileName))) {
 			PDFRenderer pdfRenderer = new PDFRenderer(document);
-			image = pdfRenderer.renderImageWithDPI(page, DocumentHandler.DPI);
+			image = pdfRenderer.renderImageWithDPI(page, DPI);
 			document.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -118,7 +120,7 @@ public class TempImageBuffer {
 
 			for (int n = 0; n < tfdb.length; n++) {
 				if (!tfdb[n].alreadyWritten) {
-					image = pdfRenderer.renderImageWithDPI(n, DocumentHandler.DPI);
+					image = pdfRenderer.renderImageWithDPI(n, DPI);
 					readWriteImage(n, image);
 				}
 			}
