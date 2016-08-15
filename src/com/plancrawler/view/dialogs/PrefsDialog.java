@@ -12,11 +12,8 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 
-import com.plancrawler.view.support.PrefsEvent;
 import com.plancrawler.view.support.PrefsListener;
 
 public class PrefsDialog extends JDialog {
@@ -24,11 +21,8 @@ public class PrefsDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private JTextField docPathField;
 	private JTextField tempPathField;
-	private JSpinner dpiSpinner;
-	private SpinnerNumberModel spinnerModel;
 	private String lastDoc;
 	private String lastTemp;
-	private int lastDPI;
 	JButton okButt, cancelButt;
 	JButton chooseDocButt;
 	JButton chooseTempButt;
@@ -48,23 +42,18 @@ public class PrefsDialog extends JDialog {
 
 		docPathField = new JTextField();
 		tempPathField = new JTextField();
-
-		spinnerModel = new SpinnerNumberModel(200, 100, 300, 25);
-		dpiSpinner = new JSpinner(spinnerModel);
-
+		
 		okButt = new JButton("OK");
 		okButt.addActionListener((e) -> {
 			String docPath = docPathField.getText();
 			String tempPath = tempPathField.getText();
-			int dpiVal = (int) dpiSpinner.getValue();
-
 			if (!docPath.endsWith("\\"))
 				docPath += "\\";
 			if (!tempPath.endsWith("\\"))
 				tempPath += "\\";
-
-			setDefaults(docPath, tempPath, dpiVal);
-			alertListeners(docPath, tempPath, dpiVal);
+			
+			setDefaults(docPath, tempPath);
+			alertListeners(docPath, tempPath);
 			setVisible(false);
 		});
 
@@ -72,22 +61,21 @@ public class PrefsDialog extends JDialog {
 		cancelButt.addActionListener((e) -> {
 			docPathField.setText(lastDoc);
 			tempPathField.setText(lastTemp);
-			dpiSpinner.setValue(lastDPI);
 			setVisible(false);
 		});
 
 		chooseDocButt = new JButton("Choose");
-		chooseDocButt.addActionListener((e) -> {
+		chooseDocButt.addActionListener((e)->{
 			chooser.setCurrentDirectory(new File(lastDoc));
-			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
 				docPathField.setText(chooser.getSelectedFile().getAbsolutePath());
 			}
 		});
 
 		chooseTempButt = new JButton("Choose");
-		chooseTempButt.addActionListener((e) -> {
+		chooseTempButt.addActionListener((e)->{
 			chooser.setCurrentDirectory(new File(lastTemp));
-			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
 				tempPathField.setText(chooser.getSelectedFile().getAbsolutePath());
 			}
 		});
@@ -136,16 +124,6 @@ public class PrefsDialog extends JDialog {
 
 		// next line
 		gc.gridy++;
-		gc.gridx = 0;
-		gc.weighty = 1;
-		gc.anchor = GridBagConstraints.FIRST_LINE_END;
-		add(new JLabel("DPI for PDF: "), gc);
-		gc.gridx++;
-		gc.anchor = GridBagConstraints.FIRST_LINE_START;
-		add(dpiSpinner, gc);
-
-		// next line
-		gc.gridy++;
 		gc.gridx = 1;
 		gc.anchor = GridBagConstraints.FIRST_LINE_END;
 		gc.insets = rightPad;
@@ -157,26 +135,24 @@ public class PrefsDialog extends JDialog {
 
 	}
 
-	public void setDefaults(String docPath, String tempPath, int DPI) {
+	
+	public void setDefaults(String docPath, String tempPath) {
 		lastDoc = docPath;
 		docPathField.setText(docPath);
 		lastTemp = tempPath;
 		tempPathField.setText(tempPath);
-		lastDPI = DPI;
-		dpiSpinner.setValue(DPI);
 	}
 
-	private void alertListeners(String docPath, String tempPath, int dpiVal) {
-		PrefsEvent pe = new PrefsEvent(this, docPath, tempPath, dpiVal);
+	private void alertListeners(String docPath, String tempPath){
 		for (PrefsListener pfl : listeners)
-			pfl.preferencesSet(pe);
+			pfl.preferencesSet(docPath, tempPath);
 	}
-
+	
 	public void addPrefsListener(PrefsListener prefsListener) {
 		listeners.add(prefsListener);
 	}
-
-	public boolean remPrefsListener(PrefsListener prefsListener) {
+	
+	public boolean remPrefsListener(PrefsListener prefsListener){
 		return listeners.remove(prefsListener);
 	}
 }

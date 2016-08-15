@@ -31,7 +31,6 @@ public class MeasureToolbar extends JToolBar {
 	private JToggleButton gridButt;
 	private JComboBox<String> scaleComboBox;
 	private DefaultComboBoxModel<String> scaleModel = new DefaultComboBoxModel<String>();
-	private int dpi;
 
 	private Color noColor;
 	private Color selectedColor = Color.cyan;
@@ -41,7 +40,7 @@ public class MeasureToolbar extends JToolBar {
 	private boolean isMeasuring = false;
 	private boolean isCalibrating = false;
 
-	public MeasureToolbar(PDFViewPane hostPane, int dpi) {
+	public MeasureToolbar(PDFViewPane hostPane) {
 		MeasureMouseListener listener = new MeasureMouseListener();
 		this.hostPane = hostPane;
 		hostPane.addMouseListener(listener);
@@ -50,10 +49,6 @@ public class MeasureToolbar extends JToolBar {
 		setupButtons();
 		setupCalibrationBox();
 		addComponents();
-	}
-	
-	public void setDPI(int value){
-		dpi = value;
 	}
 
 	public void setupButtons() {
@@ -161,16 +156,16 @@ public class MeasureToolbar extends JToolBar {
 			activeScale = 1;
 			break;
 		case 1: // 1/4" = 1'
-			activeScale = Measurement.getCalibration(0.25, 1.0, dpi);
+			activeScale = Measurement.getCalibration(0.25, 1.0);
 			break;
 		case 2: // 1/2" = 1'
-			activeScale = Measurement.getCalibration(0.50, 1.0, dpi);
+			activeScale = Measurement.getCalibration(0.50, 1.0);
 			break;
 		case 3: // 1/3" = 1'
-			activeScale = Measurement.getCalibration(0.333, 1.0, dpi);
+			activeScale = Measurement.getCalibration(0.333, 1.0);
 			break;
 		case 4: // 1/8" = 1'
-			activeScale = Measurement.getCalibration(0.025, 1.0, dpi);
+			activeScale = Measurement.getCalibration(0.025, 1.0);
 			break;
 		case 5: // this is custom, so we will change this with a calibration
 				// measurement.

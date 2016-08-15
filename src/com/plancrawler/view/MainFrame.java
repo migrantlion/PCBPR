@@ -47,7 +47,6 @@ import com.plancrawler.view.dialogs.EntryModifyDialog;
 import com.plancrawler.view.dialogs.PrefsDialog;
 import com.plancrawler.view.support.EntryFormEvent;
 import com.plancrawler.view.support.ItemTableModel;
-import com.plancrawler.view.support.PrefsEvent;
 import com.plancrawler.view.support.PrefsListener;
 import com.plancrawler.view.toolbars.FocusToolbar;
 import com.plancrawler.view.toolbars.MeasureToolbar;
@@ -102,8 +101,8 @@ public class MainFrame extends JFrame {
 		this.setIconImages(spiders);
 
 		setupFrame();
-		addComponents();
 		setPrefs();
+		addComponents();
 	}
 
 	private ImageIcon createIcon(String string) {
@@ -140,22 +139,16 @@ public class MainFrame extends JFrame {
 		prefsDialog = new PrefsDialog(this);
 		prefsDialog.addPrefsListener(new PrefsListener() {
 			@Override
-			public void preferencesSet(PrefsEvent e) {
-				controller.setPaths(e.getPdfPath(), e.getTempPath());
-				controller.setDPI(e.getDPI());
-				prefs.put("pdfPath", e.getPdfPath());
-				prefs.put("tempPath", e.getTempPath());
-				prefs.putInt("DPI", e.getDPI());
+			public void preferencesSet(String pdfPath, String tempPath) {
+				controller.setPaths(pdfPath, tempPath);
+				prefs.put("pdfPath", pdfPath);
+				prefs.put("tempPath", tempPath);
 			}
 		});
 		String docPath = prefs.get("pdfPath", System.getProperty("user.home"));
 		String tempPath = prefs.get("tempPath", System.getProperty("user.home"));
-		int DPI = prefs.getInt("DPI", 200);
 		controller.setPaths(docPath, tempPath);
-		controller.setDPI(DPI);
-		if (measToolbar != null)
-			measToolbar.setDPI(DPI);
-		prefsDialog.setDefaults(docPath, tempPath, DPI);
+		prefsDialog.setDefaults(docPath, tempPath);
 	}
 
 	private void addComponents() {
@@ -213,7 +206,7 @@ public class MainFrame extends JFrame {
 		});
 		toolPanel.add(focusToolbar);
 
-		measToolbar = new MeasureToolbar(pdfViewPanel, controller.getDPI());
+		measToolbar = new MeasureToolbar(pdfViewPanel);
 		measToolbar.addMeasurementListener((m) -> {
 			controller.setMeasuring(m.isMeasurementActive());
 			if (m.isMeasurementActive())
@@ -502,7 +495,6 @@ public class MainFrame extends JFrame {
 						pcMenubar.setSaveFileName(fileChooser.getSelectedFile().getAbsolutePath());
 						setTitlebar(fileChooser.getSelectedFile().getAbsolutePath());
 						refreshTables();
-						measToolbar.setDPI(controller.getDPI());
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					} catch (ExecutionException e) {

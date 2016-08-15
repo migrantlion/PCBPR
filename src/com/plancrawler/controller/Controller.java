@@ -23,7 +23,7 @@ import com.plancrawler.view.toolbars.RotToolbarEvent;
 
 public class Controller {
 
-	public final static String VERSION = "1.4.3.3";
+	public final static String VERSION = "1.4.3.2";
 
 	private Database db;
 	private DocumentHandler pdfDoc;
@@ -324,13 +324,5 @@ public class Controller {
 
 	public void mergePDFs(File[] files, File saveFile) throws IOException {
 		PDFMerge.mergePDFs(files, saveFile);
-	}
-
-	public void setDPI(int dpi) {
-		pdfDoc.setDPI(dpi);
-	}
-
-	public int getDPI() {
-		return pdfDoc.getDPI();
 	}
 }

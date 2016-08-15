@@ -2,6 +2,7 @@ package com.plancrawler.model;
 
 import java.io.Serializable;
 
+import com.plancrawler.controller.fileOps.DocumentHandler;
 import com.plancrawler.model.utilities.MyPoint;
 
 public class Measurement implements Serializable {
@@ -22,12 +23,12 @@ public class Measurement implements Serializable {
 		this.scale = calibrationScale;
 	}
 
-	public void calibrate(double pageInch, double realFoot, int dpi) {
-		scale = (realFoot / ((double) dpi * pageInch));
+	public void calibrate(double pageInch, double realFoot) {
+		scale = (realFoot / ((double) DocumentHandler.DPI * pageInch));
 	}
 	
-	public static double getCalibration(double pageInch, double realFoot, int dpi) {
-		return (realFoot / ((double) dpi * pageInch));
+	public static double getCalibration(double pageInch, double realFoot) {
+		return (realFoot / ((double) DocumentHandler.DPI * pageInch));
 	}
 	
 	public boolean isVerticalOrientation() {
