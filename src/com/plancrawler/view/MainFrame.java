@@ -82,6 +82,7 @@ public class MainFrame extends JFrame {
 	// Panels
 	// private JPanel westPanel;
 	private JSplitPane westPanel;
+	private JSplitPane selectSplitPane;
 	private JPanel eastPanel;
 
 	// Dialogs
@@ -101,8 +102,8 @@ public class MainFrame extends JFrame {
 		this.setIconImages(spiders);
 
 		setupFrame();
-		setPrefs();
 		addComponents();
+		setPrefs();
 	}
 
 	private ImageIcon createIcon(String string) {
@@ -143,12 +144,25 @@ public class MainFrame extends JFrame {
 				controller.setPaths(pdfPath, tempPath);
 				prefs.put("pdfPath", pdfPath);
 				prefs.put("tempPath", tempPath);
+				prefs.putInt("westDividerLoc", westPanel.getDividerLocation());
+				prefs.putInt("selectDividerLoc", selectSplitPane.getDividerLocation());
 			}
 		});
 		String docPath = prefs.get("pdfPath", System.getProperty("user.home"));
 		String tempPath = prefs.get("tempPath", System.getProperty("user.home"));
 		controller.setPaths(docPath, tempPath);
 		prefsDialog.setDefaults(docPath, tempPath);
+
+		int westDividerLocation = prefs.getInt("westDividerLoc",
+				(int) (entryFormPanel.getPreferredSize().getHeight() - 100));
+		int selectDividerLocation = prefs.getInt("selectDividerLoc", 200);
+
+		setDividerLocations(westDividerLocation, selectDividerLocation);
+	}
+
+	private void setDividerLocations(int westDividerLocation, int selectDividerLocation) {
+		westPanel.setDividerLocation(westDividerLocation);
+		selectSplitPane.setDividerLocation(selectDividerLocation);
 	}
 
 	private void addComponents() {
@@ -336,11 +350,11 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		JSplitPane botPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, itemSelectPanel, crateSelectPanel);
-		botPanel.setOneTouchExpandable(true);
-		botPanel.setDividerLocation(0.5f);
-		westPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, entryFormPanel, botPanel);
-		westPanel.setDividerLocation((int) (entryFormPanel.getPreferredSize().getHeight()));
+		selectSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, itemSelectPanel, crateSelectPanel);
+		selectSplitPane.setOneTouchExpandable(true);
+		selectSplitPane.setDividerLocation(200);
+		westPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, entryFormPanel, selectSplitPane);
+		westPanel.setDividerLocation((int) (entryFormPanel.getPreferredSize().getHeight() - 100));
 
 		return westPanel;
 	}
@@ -648,6 +662,9 @@ public class MainFrame extends JFrame {
 				"Confirm exit", JOptionPane.OK_CANCEL_OPTION);
 		if (action == JOptionPane.OK_OPTION) {
 			controller.cleanup();
+			prefs = Preferences.userNodeForPackage(this.getClass());
+			prefs.putInt("westDividerLoc", westPanel.getDividerLocation());
+			prefs.putInt("selectDividerLoc", selectSplitPane.getDividerLocation());
 			System.exit(0);
 		}
 	}
